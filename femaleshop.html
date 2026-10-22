@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drip Collection</title>
+  <style>
+    /* Base Theme Variables (Dark Mode Default) */
+    :root {
+      --drip-gradient: linear-gradient(135deg, #111111 0%, #333333 100%);
+      --gold: #d4af37;
+      --gold-hover: #e5c158;
+      --gold-glow: rgba(212, 175, 55, 0.4);
+      --bg-color: #0f0f0f;
+      --header-bg: #141414;
+      --card-bg: #1a1a1a;
+      --card-border: #2a2a2a;
+      --text-color: #ffffff;
+      --text-muted: #aaaaaa;
+      --success-green: #2ed573;
+      --popup-bg: #141414;
+      --input-bg: #222;
+      --input-border: #444;
+      --shipping-bg: #000;
+    }
+
+    /* Light Mode Theme Variables */
+    [data-theme="light"] {
+      --drip-gradient: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);
+      --gold: #b89728;
+      --gold-hover: #d4af37;
+      --gold-glow: rgba(184, 151, 40, 0.3);
+      --bg-color: #f4f4f4;
+      --header-bg: #ffffff;
+      --card-bg: #ffffff;
+      --card-border: #e0e0e0;
+      --text-color: #111111;
+      --text-muted: #666666;
+      --success-green: #2ed573;
+      --popup-bg: #ffffff;
+      --input-bg: #f9f9f9;
+      --input-border: #ccc;
+      --shipping-bg: #1a1a1a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding-bottom: 60px;
+      overflow-x: hidden;
+      width: 100%;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    /* Keyframe Animations */
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulseGlow {
+      0% {
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+      }
+      50% {
+        box-shadow: 0 0 22px rgba(212, 175, 55, 0.6);
+      }
+      100% {
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+      }
+    }
+
+    @keyframes livePulse {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(46, 213, 115, 0.7);
+      }
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 8px rgba(46, 213, 115, 0);
+      }
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(46, 213, 115, 0);
+      }
+    }
+
+    @keyframes popIn {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -45%) scale(0.9);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+
+    @keyframes confirmSlide {
+      from {
+        opacity: 0;
+        transform: translateY(-5px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Free Shipping Bar */
+    #shipping-bar-container {
+      background: var(--shipping-bg);
+      color: #fff;
+      text-align: center;
+      padding: 10px;
+      font-size: 0.9rem;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+      border-bottom: 1px solid var(--card-border);
+      width: 100%;
+      transition: background 0.3s ease;
+    }
+
+    #shipping-progress-fill {
+      background: var(--gold);
+      height: 100%;
+      width: 40%;
+      transition: width 0.5s ease-in-out;
+    }
+
+    /* Back to Top Button */
+    #backToTop {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--gold);
+      color: #000;
+      border: none;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 1001;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      transition: transform 0.3s ease, background 0.3s ease;
+    }
+
+    #backToTop:hover {
+      transform: translateY(-3px) scale(1.05);
+      background: var(--gold-hover);
+    }
+
+    /* Floating Cart Button */
+    .cart-floating-container {
+      position: fixed;
+      bottom: 75px;
+      right: 20px;
+      background: var(--drip-gradient);
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1001;
+      border: 1px solid var(--gold);
+      animation: pulseGlow 3s infinite ease-in-out;
+      transition: transform 0.3s ease;
+    }
+
+    .cart-floating-container:hover {
+      transform: scale(1.1) rotate(-5deg);
+    }
+
+    .cart-floating {
+      font-size: 1.6rem;
+    }
+
+    /* Header & Navigation */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background: var(--header-bg);
+      border-bottom: 1px solid var(--card-border);
+      animation: fadeSlideUp 0.6s ease-out forwards;
+      position: relative;
+      z-index: 1000;
+      width: 100%;
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .logo img {
+      height: 40px;
+      max-width: 100%;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
+
+    .logo img:hover {
+      transform: scale(1.05);
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+    }
+
+    .currency-select, .theme-toggle-btn {
+      background: var(--card-bg);
+      color: var(--gold);
+      border: 1px solid var(--gold);
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.3s, box-shadow 0.3s, background 0.3s, color 0.3s;
+    }
+
+    .currency-select:hover, .theme-toggle-btn:hover {
+      box-shadow: 0 0 8px var(--gold-glow);
+    }
+
+    .menu-btn {
+      background: transparent;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      padding: 8px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .menu-btn:hover {
+      background: var(--gold);
+      color: #000;
+    }
+
+    .nav-links {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 45px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      z-index: 1005;
+      min-width: 180px;
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .nav-links.active {
+      display: block;
+      animation: fadeSlideUp 0.3s ease-out forwards;
+    }
+
+    .nav-links a {
+      color: var(--text-color);
+      text-decoration: none;
+      display: block;
+      margin-bottom: 0.8rem;
+      font-size: 0.95rem;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--gold);
+      transform: translateX(4px);
+    }
+
+    /* Product Grid Layout */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 20px;
+      padding: 1.5rem;
+      max-width: 1300px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .product {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 1rem;
+      border: 1px solid var(--card-border);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s, border-color 0.3s, background 0.3s;
+      animation: fadeSlideUp 0.6s ease-out forwards;
+      width: 100%;
+    }
+
+    .product:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15), 0 0 15px var(--gold-glow);
+      border-color: var(--gold);
+    }
+
+    .wish-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.6);
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      font-size: 1rem;
+      color: #ff4757;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+      transition: transform 0.2s ease, background 0.2s;
+    }
+
+    .wish-btn:hover {
+      transform: scale(1.15);
+      background: rgba(0, 0, 0, 0.85);
+    }
+
+    .wish-btn.active {
+      background: #ff4757;
+      color: #fff;
+    }
+
+    .product img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.4s ease;
+    }
+
+    .product:hover img {
+      transform: scale(1.02);
+    }
+
+    .product-details {
+      margin-top: 1rem;
+    }
+
+    .live-viewers {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #2ed573;
+      border-radius: 50%;
+      animation: livePulse 1.8s infinite ease-in-out;
+      flex-shrink: 0;
+    }
+
+    .old-price {
+      text-decoration: line-through;
+      color: var(--text-muted);
+      margin-right: 8px;
+      font-size: 0.9rem;
+    }
+
+    .sale-price {
+      font-weight: bold;
+      color: var(--gold);
+      font-size: 1.1rem;
+    }
+
+    .product p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin: 8px 0;
+      line-height: 1.4;
+    }
+
+    .btn-organic {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      background: var(--gold);
+      color: #000;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s, transform 0.15s ease, box-shadow 0.2s;
+    }
+
+    .btn-organic:hover {
+      background: var(--gold-hover);
+      box-shadow: 0 4px 12px var(--gold-glow);
+    }
+
+    .btn-organic:active {
+      transform: scale(0.96);
+    }
+
+    /* Confirmation Banner */
+    .confirmation {
+      display: none;
+      color: var(--success-green);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: center;
+      margin-top: 10px;
+      animation: confirmSlide 0.3s ease-out forwards;
+    }
+
+    /* Modern Professional Modal Styles */
+    #overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 2000;
+      transition: opacity 0.3s ease;
+    }
+
+    #product-popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--popup-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      width: 90%;
+      max-width: 800px;
+      max-height: 90vh;
+      
+      overflow-y: auto;
+      z-index: 2001;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .popup-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .popup-images {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      height: 100%;
+    }
+
+    .popup-main-img {
+      width: 100%;
+      height: 480%;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      transition: opacity 0.2s ease;
+    }
+
+    .popup-thumbs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .popup-thumb {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid var(--card-border);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .popup-thumb:hover {
+      transform: scale(1.05);
+      border-color: var(--gold);
+    }
+
+    .popup-info h2 {
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+      font-size: 1.3rem;
+    }
+
+    .popup-description {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin: 1rem 0;
+    }
+
+    .popup-form-group {
+      margin-bottom: 1rem;
+    }
+
+    .popup-form-group label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+    }
+
+    .popup-input {
+      width: 100%;
+      height: 100%;
+      padding: 10px;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      color: var(--text-color);
+      border-radius: 6px;
+      outline: none;
+      transition: border-color 0.2s, background 0.3s, color 0.3s;
+    }
+
+    .popup-input:focus {
+      border-color: var(--gold);
+    }
+
+    .btn-secondary {
+      width: 100%;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--input-border);
+      border-radius: 20px;
+      padding: 10px;
+      margin-top: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+
+    .btn-secondary:hover {
+      color: var(--text-color);
+      border-color: var(--gold);
+      background: rgba(212, 175, 55, 0.05);
+    }
+
+    /* Related Products Section in Popup */
+    .related-products {
+      margin-top: 1.5rem;
+      border-top: 1px solid var(--card-border);
+      padding-top: 1rem;
+    }
+
+    .related-products h4 {
+      color: var(--gold);
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+
+    .related-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 10px;
+    }
+
+    .related-item {
+      background: var(--card-bg);
+      border-radius: 8px;
+      padding: 6px;
+      text-align: center;
+      cursor: pointer;
+      border: 1px solid var(--card-border);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .related-item:hover {
+      transform: translateY(-3px);
+      border-color: var(--gold);
+    }
+
+    .related-item img {
+      width: 100%;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+
+    .related-item p {
+      font-size: 0.7rem;
+      color: var(--text-color);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-top: 4px;
+    }
+
+    /* Recently Viewed Section */
+    #recently-viewed-section {
+      max-width: 1300px;
+      margin: 2rem auto 1rem auto;
+      padding: 0 1.5rem;
+      width: 100%;
+    }
+
+    .rv-container {
+      display: flex;
+      gap: 15px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+
+    .btn-clear-rv {
+      background: transparent;
+      border: 1px solid var(--input-border);
+      color: var(--text-muted);
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .btn-clear-rv:hover {
+      color: var(--text-color);
+      border-color: var(--gold);
+    }
+
+    /* Media Queries for Full Responsiveness */
+    @media (max-width: 768px) {
+      .header {
+        padding: 0.8rem 1rem;
+      }
+
+      .logo img {
+        height: 35px;
+      }
+
+      .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+        padding: 1rem;
+      }
+
+      .product img {
+        height: 180px;
+      }
+
+      .popup-container {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .popup-main-img {
+        height: 220px;
+      }
+
+      #product-popup {
+        padding: 1rem;
+        width: 95%;
+      }
+
+      #backToTop {
+        bottom: 15px;
+        right: 15px;
+        width: 40px;
+        height: 40px;
+      }
+
+      .cart-floating-container {
+        bottom: 65px;
+        right: 15px;
+        width: 50px;
+        height: 50px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .product-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-controls {
+        gap: 6px;
+      }
+
+      .currency-select, .theme-toggle-btn {
+        padding: 6px 8px;
+        font-size: 0.75rem;
+      }
+
+      .menu-btn {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+      }
+    }
+
+    #backToTop { 
+    position: fixed;
+    bottom: 15px; 
+    right: 15px; 
+    width: 40px; 
+    height: 40px; 
+    z-index: 1000;
+}
+
+.cart-floating-container { 
+    position: fixed;
+    bottom: 65px; 
+    right: 15px; 
+    width: 50px; 
+    height: 50px; 
+    z-index: 1000;
+}
+/* Base configurations for the floating layout stack */
+#backToTop { 
+    position: fixed;
+    bottom: 15px; 
+    right: 15px; 
+    width: 40px; 
+    height: 40px; 
+    z-index: 1000;
+    cursor: pointer;
+}
+
+.cart-floating-container { 
+    position: fixed;
+    bottom: 65px; 
+    right: 15px; 
+    width: 50px; 
+    height: 50px; 
+    z-index: 1000;
+    cursor: pointer;
+}
+
+/* WhatsApp Floating Container Wrapper */
+#whatsappHelp {
+    position: fixed;
+    bottom: 125px; 
+    right: 20px;   
+    width: 40px;
+    height: 40px;
+    background-color: #25D366;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 1000;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+    text-decoration: none;
+}
+
+/* SVG Vector Sizing */
+#whatsappHelp svg {
+    width: 22px;
+    height: 22px;
+    fill: #ffffff;
+    z-index: 2;
+}
+
+/* NEW: Text Bubble Label */
+.whatsapp-label {
+    position: absolute;
+    right: 50px; /* Positions bubble directly to the left of the button icon */
+    background-color: #111111;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 6px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    pointer-events: none; /* Prevents text layer from blocking pointer inputs */
+    opacity: 0;
+    transform: translateX(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Text Bubble Tail Little Triangle */
+.whatsapp-label::after {
+    content: '';
+    position: absolute;
+    right: -4px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-width: 4px 0 4px 4px;
+    border-style: solid;
+    border-color: transparent transparent transparent #111111;
+}
+
+/* Hover Actions: Scales icon and displays text label cleanly */
+#whatsappHelp:hover {
+    transform: scale(1.05);
+    background-color: #20ba5a;
+}
+
+#whatsappHelp:hover .whatsapp-label {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Active Support Live Pulsing Indicator Dot */
+#whatsappHelp::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 10px;
+    height: 10px;
+    background-color: #00FF00;
+    border: 2px solid #25D366;  
+    border-radius: 50%;
+    box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.7);
+    animation: pulseBadge 1.8s infinite;
+    z-index: 3;
+}
+
+@keyframes pulseBadge {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.7);
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 6px rgba(0, 255, 0, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(0, 255, 0, 0);
+    }
+}
+
+.popup-container { grid-template-columns: 1fr; gap: 1rem; } 
+.popup-main-img { height: 220px; } 
+#product-popup { padding: 1rem; width: 95%; } 
+
+/* Responsive Rules Configuration */
+@media (max-width: 768px) {
+    #backToTop { bottom: 15px; right: 15px; }
+    .cart-floating-container { bottom: 65px; right: 15px; }
+    #whatsappHelp { bottom: 125px; right: 20px; }
+    
+    /* Keep label hidden on small screens to prevent covering up card imagery */
+    .whatsapp-label { display: none; } 
+}
+
+@media (max-width: 480px) { 
+    .product-grid { grid-template-columns: 1fr; } 
+    .nav-controls { gap: 6px; } 
+    .currency-select, .theme-toggle-btn { padding: 6px 8px; font-size: 0.75rem; }
+    .menu-btn { padding: 6px 10px; font-size: 0.8rem; } 
+} 
+
+
+/* DRIPSTAR PRODUCT POPUP — FULL IMAGE FIX */
+
+#product-popup {
+    width: min(96%, 1100px) !important;
+    max-width: 1100px !important;
+    max-height: 94vh !important;
+    max-height: 94dvh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 20px !important;
+    box-sizing: border-box;
+}
+
+.popup-container {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr) !important;
+    gap: 24px !important;
+    align-items: start !important;
+}
+
+.popup-images {
+    width: 100%;
+    min-width: 0;
+}
+
+.popup-main-img {
+    display: block !important;
+    width: 100% !important;
+    height: clamp(320px, 62vh, 680px) !important;
+    max-height: 62vh !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    background: #0a0a0a;
+    border-radius: 10px;
+    padding: 6px;
+    box-sizing: border-box;
+}
+
+.popup-thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.popup-thumb {
+    width: 65px !important;
+    height: 65px !important;
+    object-fit: contain !important;
+    background: #0a0a0a;
+    padding: 3px;
+    flex-shrink: 0;
+}
+
+/* Tablets and mobile phones */
+@media (max-width: 768px) {
+    #product-popup {
+        width: 96% !important;
+        max-height: 92vh !important;
+        max-height: 92dvh !important;
+        padding: 14px !important;
+        border-radius: 12px;
+    }
+
+    .popup-container {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 16px !important;
+    }
+
+    .popup-main-img {
+        height: min(55vh, 480px) !important;
+        height: min(55dvh, 480px) !important;
+        max-height: 55vh !important;
+        max-height: 55dvh !important;
+        min-height: 260px;
+        object-fit: contain !important;
+    }
+
+    .popup-info h2 {
+        font-size: 1.2rem;
+    }
+}
+
+/* Small phones */
+@media (max-width: 380px) {
+    #product-popup {
+        padding: 10px !important;
+    }
+
+    .popup-main-img {
+        min-height: 230px;
+        height: 48vh !important;
+        height: 48dvh !important;
+    }
+}
+
+</style>
+</head>
+<body>
+  <div id="shipping-bar-container"> 
+    <span id="shipping-text">You're $500 away from FREE SHIPPING!</span> 
+    <div style="background: rgba(128,128,128,0.2); height: 6px; width: 60%; margin: 5px auto; border-radius: 10px; overflow: hidden;"> 
+        <div id="shipping-progress-fill"></div> 
+    </div> 
+</div> 
+
+<!-- Back to Top Floating Button --> 
+<button id="backToTop" onclick="window.scrollTo({top:0, behavior:'smooth'})">↑</button>
+
+<!-- Floating Cart Icon --> 
+<div class="cart-floating-container" onclick="window.location.href='alllcart.html'"> 
+    <span class="cart-floating">🛒</span> 
+</div>
+
+<!-- Native HTML Anchor Link Routing to WhatsApp with live nested label -->
+<a id="whatsappHelp" href="https://wa.me/2349064575303" target="_blank" rel="noopener noreferrer" title="Support is Online">
+    <!-- Text Label Inside Container -->
+    <span class="whatsapp-label">Chat with Drip-Support</span>
+    
+    <svg xmlns="http://w3.org" viewBox="0 0 448 512">
+        <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7 .9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
+    </svg>
+</a>
+<!-- Main Navigation Header --> 
+<header class="header"> 
+    <div class="logo"> 
+        <h2><a href="index.html"><img src="WhatsApp Image 2026-07-15 at 3.20.36 AM.jpeg" alt="drip logo"></a></h2> 
+    </div> 
+    <div class="nav-controls"> 
+        <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleTheme()">☀%EF%B8%8F Light</button> 
+        <select id="currency-select" class="currency-select" onchange="changeCurrency(this.value)"> 
+            <option value="USD">USD ($)</option> 
+            <option value="EUR">EUR (€)</option> 
+            <option value="GBP">GBP (£)</option> 
+            <option value="NGN">NGN (₦)</option> 
+        </select> 
+        <nav class="top-nav"> 
+            <button class="menu-btn" onclick="toggleMenu(event)"> ☰ MENU </button> 
+            <div class="nav-links" id="nav-links"> 
+                <a href="index.html">Home</a> 
+                <a href="shop.html">Male Section</a> 
+                <a href="femaleshop.html">Female Section</a> 
+                <a href="wishlist.html">Wishlist</a> 
+                <a href="dripAbout.html">About</a> 
+                <a href="alllcart.html">Cart</a> 
+                <a href="driplogin.html">Login</a> 
+                <a href="1of1.html">1 of 1 shop</a> 
+                <a href="profile.html">Drip Profile</a> 
+            </div> 
+        </nav> 
+    </div> 
+</header>
+
+  <!-- Main Product Showcase Grid -->
+  <main class="product-grid">
+
+<div class="product">
+    <div style="position:relative;">
+        <button class="wish-btn" onclick="toggleWish(this, 'DS0 black crop top','DS0 black crop top', 20, 'WhatsApp Image 2026-07-13 at 1.44.35 AM.jpeg', 'DRIPSTAR nano Crop Top')">❤</button>
+        <img src="WhatsApp Image 2026-07-13 at 1.44.35 AM.jpeg" alt="Black Top" onclick="openPopup('DSO black crop top', 'WhatsApp Image 2026-07-13 at 1.44.35 AM.jpeg', 'WhatsApp Image 2026-07-13 at 1.30.05 AM.jpeg', 20, 'DRIPSTAR nano Crop Top — crafted for women who move with confidence, set trends, and make every outfit a statement. Clean silhouette. Premium feel. Streetwear attitude.')">
+    </div>
+    <div class="product-details">
+      <div class="live-viewers"><div class="live-dot"></div><span class="view-count">3</span> people are viewing this right now</div>
+      <b>Dripstar nano crop top</b><br>
+      <span class="old-price" data-usd="20">$20</span><span class="sale-price" data-usd="20">$20</span>
+      <p>DRIPSTAR nano Crop Top — crafted for women who move with confidence, set trends, and make every outfit a statement. Clean silhouette. Premium feel. Streetwear attitude.</p>
+      <button class="btn-organic" onclick="addToCart('Dripstar nano crop top', 'M', 20, 1, 'WhatsApp Image 2026-07-13 at 1.44.35 AM.jpeg', 'DRIPSTAR nano Crop Top — crafted for women who move with confidence, set trends, and make every outfit a statement. Clean silhouette. Premium feel. Streetwear attitude.', this)">Add to Cart</button>
+      <div class="confirmation">your drip has been added to cart</div>
+    </div>
+  </div>    
+
+    <div class="product">
+      <div style="position:relative;">
+        <button class="wish-btn" onclick="toggleWish(this, '', ' M.O.B singlet', 20, 'WhatsApp Image 2026-08-14 at 2.01.19 AM.jpeg', 'DS0 M.O.B singlet, consisting of unmatched Aura embeded in its premium fabric, for the ones that choose to drip like stars in a simple way.')">❤</button>
+        <img src="WhatsApp Image 2026-08-14 at 2.01.19 AM.jpeg" alt="DSO M.O.B singlet" onclick="openPopup('DSO M.O.B singlet', 'WhatsApp Image 2026-08-14 at 2.01.19 AM.jpeg', 'WhatsApp Image 2026-08-14 at 2.01.18 AM.jpeg', 20, 'DS0 nano singlet, consisting of unmatched Aura embeded in its premium fabric, for the ones that choose to drip like stars in a simple way.')">
+      </div>
+      <div class="product-details">
+        <div class="live-viewers"><div class="live-dot"></div><span class="view-count">2</span> people are viewing this right now</div>
+        <b> DSO Black M.O.B singlet</b><br>
+        <span class="old-price" data-usd="20">$20</span><span class="sale-price" data-usd="20">$20</span>
+        <p>DSO Black M.O.B singlet, consisting of unmatched Aura embeded in its premium fabric for, the ones that choose to drip like stars in a simple way.</p>
+        <button class="btn-organic" onclick="addToCart('DSO M.O.B singlet','M',20,1,'WhatsApp Image 2026-08-14 at 2.01.19 AM.jpeg','DSO M.O.B singlet, consisting of unmatched Aura embeded in its premium fabric for, the ones that choose to drip like stars in a simple way.',this)">Add to Cart</button>
+        <div class="confirmation">your dsO-singlet has been added to your cart</div>
+      </div>
+    </div>
+
+ <div class="product">
+      <div style="position:relative;">
+        <button class="wish-btn" onclick="toggleWish(this, '', ' M.O.B singlet', 20, 'WhatsApp Image 2026-08-14 at 2.01.17 AM (1).jpeg', 'DS0 M.O.B singlet, consisting of unmatched Aura embeded in its premium fabric, for the ones that choose to drip like stars in a simple way.')">❤</button>
+        <img src="WhatsApp Image 2026-08-14 at 2.01.17 AM (1).jpeg" alt="DS0 M.O.B singlet" onclick="openPopup('DS0 M.O.B singlet', 'WhatsApp Image 2026-08-14 at 2.01.17 AM (1).jpeg', 'WhatsApp Image 2026-08-14 at 2.01.17 AM.jpeg', 20, 'DS0 nano singlet, consisting of unmatched Aura embeded in its premium fabric, for the ones that choose to drip like stars in a simple way.')">
+      </div>
+      <div class="product-details">
+        <div class="live-viewers"><div class="live-dot"></div><span class="view-count">2</span> people are viewing this right now</div>
+        <b> DSO White M.O.B singlet</b><br>
+        <span class="old-price" data-usd="20">$20</span><span class="sale-price" data-usd="20">$20</span>
+        <p>DSO White M.O.B singlet, consisting of unmatched Aura embeded in its premium fabric for, the ones that choose to drip like stars in a simple way.</p>
+        <button class="btn-organic" onclick="addToCart('DS0 M.O.B singlet','M',20,1,'WhatsApp Image 2026-08-14 at 2.01.19 AM.jpeg','DS0 M.O.B singlet, consisting of unmatched Aura embeded in its premium fabric for, the ones that choose to drip like stars in a simple way.',this)">Add to Cart</button>
+        <div class="confirmation">your dso-singlet has been added to your cart</div>
+      </div>
+    </div>
+
+
+  <div class="product">
+    <div style="position:relative;">
+        <button class="wish-btn" onclick="toggleWish(this, 'currenciaga nano dress', 'currenciaga nano dress', 15,'W5 FRONT.jpeg', 'currenciaga nano dress')">❤</button>
+        <img src="W5 FRONT.jpeg" alt="Jean Skirt" onclick="openPopup('currenciaga nano dress', 'W5 FRONT.jpeg', 'W5 BACK.jpeg', 15, 20)">
+    </div>
+    <div class="product-details">
+      <div class="live-viewers"><div class="live-dot"></div><span class="view-count">1</span> people are viewing this right now</div>
+      <b>currenciaga nano dress</b><br>
+      <span class="old-price" data-usd="20">$15</span><span class="sale-price" data-usd="15">$15</span>
+      <p>Embrace elegance with our currenciaga nano dress that flows beautifully with each step. Designed with a flattering silhouette and intricate detailing.</p>
+      <button class="btn-organic" onclick="addToCart('currenciaga nano dress','M',15,1,'W5 FRONT.jpeg','Embrace elegance with our currenciaga nano dress.',this)">Add to Cart</button>
+      <div class="confirmation">your drip has been added to cart</div>
+    </div>
+  </div>  
+
+  <div class="product">
+    <div style="position:relative;">
+        <button class="wish-btn" onclick="toggleWish(this, 'MOB female Sweatpants','MOB female Sweatpants', 30,'W4 FRONT.jpeg', ' MOB female Sweatpants a Modern fit joggers')">❤</button>
+        <img src="W4 FRONT.jpeg" alt="Jean Skirt" onclick="openPopup('MOB female Sweatpants', 'W4 FRONT.jpeg', 'W4 BACK.jpeg', 30, 30)">
+    </div>
+    <div class="product-details">
+      <div class="live-viewers"><div class="live-dot"></div><span class="view-count">1</span> people are viewing this right now</div>
+      <b>MOB female Sweatpants</b><br>
+      <span class="old-price" data-usd="30">$30</span><span class="sale-price" data-usd="30">$30</span>
+      <p>Embrace elegance with our MOB female Sweatpants a Modern fit joggers designed for the ultimate drip.</p>
+      <button class="btn-organic" onclick="addToCart('MOB female Sweatpants','M',30,1,'W4 FRONT.jpeg','MOB female Sweatpants a Modern fit joggers.',this)">Add to Cart</button>
+      <div class="confirmation">your drip has been added to cart</div>
+    </div>
+  </div>
+
+
+  <div class="product">
+    <div style="position:relative;">
+        <button class="wish-btn" onclick="toggleWish(this, 'DS0 Yellow Brazil long-sleeve','DS0 Yellow Brazil long-sleeve', 20,'W2 FRONT.jpeg','DS0 Yellow Brazil long-sleeve')">❤</button>
+        <img src="W2 FRONT.jpeg" alt="Jean Skirt" onclick="openPopup('DS0 Yellow Brazil long-sleeve', 'W2 FRONT.jpeg', 'W2 BACK.jpeg', 20, 30)">
+    </div>
+    <div class="product-details">
+      <div class="live-viewers"><div class="live-dot"></div><span class="view-count">9</span> people are viewing this right now</div>
+      <b>DS0 Yellow Brazil long-sleeve</b><br>
+      <span class="old-price" data-usd="30">$20</span><span class="sale-price" data-usd="20">$20</span>
+      <p>Embrace elegance with our DS0 Yellow Brazil long-sleeve Designed for the ultimate Baddies.</p>
+      <button class="btn-organic" onclick="addToCart('DSO Yellow Brazil long-sleeve','M',20,1,'W2 FRONT.jpeg','DS0 Yellow Brazil long-sleeve Designed for the ultimate Baddies.',this)">Add to Cart</button>
+      <div class="confirmation">your drip has been added to cart</div>
+    </div>
+  </div>
+
+ 
+
+  <div class="product">
+    <div style="position:relative;">
+        <button class="wish-btn" onclick="toggleWish(this, 'DS0 white rider crop-top','DS0 white rider crop-top' , 10, 'sheinridercroptop.jpeg', 'DS0 white rider crop-top')">❤</button>
+        <img src="sheinridercroptop.jpeg" alt="DSO white rider crop-top" onclick="openPopup('DS0 white rider crop-top', 'sheinridercroptop.jpeg', 'shein 3-back.jpeg', 15, 10)">
+    </div>
+    <div class="product-details">
+      <div class="live-viewers"><div class="live-dot"></div>SOLD OUT</div>
+      <b>DSO white rider crop-top</b><br>
+      <span class="old-price" data-usd="15">$15</span><span class="sale-price" data-usd="10">$10</span>
+      <p>DS0 rider crop-top designed for the ultimate drip.</p>
+      <button class="btn-organic" onclick="addToCart('DS0 white rider crop-top','M',10,1,'sheinridercroptop.jpeg','DS0 rider crop-top designed for the ultimate drip.',this)">Add to Cart</button>
+      <div class="confirmation">your drip has been added to cart</div>
+    </div>
+  </div>
+
+
+
+  <div class="product">
+    <div style="position:relative;">
+        <button class="wish-btn" onclick="toggleWish(this, ' DS0 CaLi Dress', 'DS0 CaLi Dress', 20, '1front.jpeg', 'Strictly for the Baddies.')">❤</button>
+        <img src="1front.jpeg" alt="Black Joggers" onclick="openPopup(' DS0 CaLi Dress', '1front.jpeg', '1back.jpeg', 20, 25)">
+    </div>
+    <div class="product-details">
+      <div class="live-viewers"><div class="live-dot"></div><span class="view-count">41</span> people are viewing this right now</div>
+      <b> DS0  Mini CaLi Dress</b><br>
+      <span class="old-price" data-usd="25">$20</span><span class="sale-price" data-usd="20">$20</span>
+      <p>Strictly for the Baddies.</p>
+      <button class="btn-organic" onclick="addToCart('DS0 Mini CaLi Dress','M',20,1,'1front.jpeg','Strictly for the Baddies.',this)">Add to Cart</button>
+      <div class="confirmation">your drip has been added to cart</div>
+    </div>
+  </div>
+
+
+
+  <div class="product">
+    <div style="position:relative;">
+        <button class="wish-btn" onclick="toggleWish(this, 'DS0 ELEGANZA DRESS','DS0 ELEGANZA DRESS', 15, 'FEMALE1.jpeg', 'DS0 ELEGANZA DRESS - If elegance was a dress')">❤</button>
+        <img src="FEMALE1.jpeg" alt="Black Joggers" onclick="openPopup('DSO ELEGANZA DRESS', 'FEMALE1.jpeg', 'FEMALE1 BACK.jpeg', 15, 20)">
+    </div>
+    <div class="product-details">
+      <div class="live-viewers"><div class="live-dot"></div><span class="view-count">1</span> people are viewing this right now</div>
+      <b>DS0 ELEGANZA DRESS</b><br>
+      <span class="old-price" data-usd="20">$15</span><span class="sale-price" data-usd="15">$15</span>
+      <p> DS0 ELEGANZA DRESS designed for the ultimate Baddies. designed With Shirred Details And Plants Pattern Sleeveless Flounce Hem</p>
+      <button class="btn-organic" onclick="addToCart('DS0 ELEGANZA DRESS','M',15,1,'FEMALE1.jpeg','DS0 ELEGANZA DRESS designed for the ultimate Baddies.',this)">Add to Cart</button>
+      <div class="confirmation">your drip has been added to cart</div>
+    </div>
+  </div>
+
+
+  <div class="product">
+    <div style="position:relative;">
+        <button class="wish-btn" onclick="toggleWish(this, 'DS0 browniee', 'DS0 browniee' , 30, 'sheinbfront.jpeg', 'Modern fit summer wear designed for the ultimate Baddies.')">❤</button>
+        <img src="sheinbfront.jpeg" alt="Black Joggers" onclick="openPopup('DSO browniee', 'sheinbfront.jpeg', '', 20, 30)">
+    </div>
+    <div class="product-details">
+      <div class="live-viewers"><div class="live-dot"></div><span class="view-count">11</span> people are viewing this right now</div>
+      <b>DS0 browniee</b><br>
+      <span class="old-price" data-usd="30">$20</span><span class="sale-price" data-usd="20">$20</span>
+      <p>Modern fit summer wear designed for the Baddies.</p>
+      <button class="btn-organic" onclick="addToCart('DS0 browniee','M',20,1,'sheinbfront.jpeg','Modern fit summer wear designed for the Baddies.',this)">Add to Cart</button>
+      <div class="confirmation">your drip has been added to cart</div>
+    </div>
+  </div>
+
+
+  <div class="product">
+    <div style="position:relative;">
+        <button class="wish-btn" onclick="toggleWish(this, 'DS0 black Crop Hoodie', 'DSO black Crop Hoodie', 20, 'sheinffront.jpeg', 'Strictly for the Baddies.')">❤</button>
+        <img src="sheinffront.jpeg" alt="Black Joggers" onclick="openPopup('DS0 black Crop Hoodie', 'sheinffront.jpeg', 'sheinFback.jpeg', 20, 25)">
+    </div>
+    <div class="product-details">
+      <div class="live-viewers"><div class="live-dot"></div> SOLD OUT</div>
+      <b>DSO black Crop Hoodie</b><br>
+      <span class="old-price" data-usd="25">$20</span><span class="sale-price" data-usd="20">$20</span>
+      <p>Strictly for the Baddies.</p>
+      <button class="btn-organic" onclick="addToCart('DS0 black Crop Hoodie','M',20,1,'sheinffront.jpeg','Strictly for the Baddies.',this)">Add to Cart</button>
+      <div class="confirmation">your drip has been added to cart</div>
+    </div>
+  </div>
+
+
+
+  <div class="product">
+    <div style="position:relative;">
+        <button class="wish-btn" onclick="toggleWish(this, 'DS0 Green Brazil long-sleeve', 'DS0 Green Brazil long-sleeve', 15, 'W3 FRONT.jpeg', 'DS0 Green Brazil long-sleeve Retro Sporty Top,Autumn Streetwear,Everyday Y2K Vintage Style.')">❤</button>
+        <img src="W3 FRONT.jpeg" alt="Jean Skirt" onclick="openPopup('DS0 Green Brazil long-sleeve', 'W3 FRONT.jpeg', 'W3 BACK.jpeg', 15, 20)">
+    </div>
+    <div class="product-details">
+      <div class="live-viewers"><div class="live-dot"></div><span class="view-count">22</span> people are viewing this right now</div>
+      <b>DS0 Green Brazil long-sleeve</b><br>
+      <span class="old-price" data-usd="20">$15</span><span class="sale-price" data-usd="15">$15</span>
+      <p>DSO Green Brazil long-sleeve Retro Sporty Top,Autumn Streetwear,Everyday Y2K Vintage Style.</p>
+      <button class="btn-organic" onclick="addToCart('DS0 Green Brazil long-sleeve','M',15,1,'W3 FRONT.jpeg','DS0 Green Brazil long-sleeve Retro Sporty Top.',this)">Add to Cart</button>
+      <div class="confirmation">your drip has been added to cart</div>
+    </div>
+  </div>
+
+  </main>
+
+  <!-- Recently Viewed Section -->
+  <section id="recently-viewed-section">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <h3 style="color:var(--gold); margin:0;">Recently Viewed</h3>
+      <button class="btn-clear-rv" onclick="clearRecentlyViewed()">Clear History</button>
+    </div>
+    <div class="rv-container" id="rv-container"></div>
+  </section>
+
+  <!-- Interactive Professional Detail Modal -->
+  <div id="overlay" onclick="closePopup()"></div>
+  <div id="product-popup">
+    <div class="popup-container">
+      <div class="popup-images">
+        <img id="pop-main-img" class="popup-main-img" src="" alt="Product Front View">
+        <div class="popup-thumbs">
+          <img id="pop-thumb-front" class="popup-thumb" src="" onclick="switchPopImage(this.src)">
+          <img id="pop-thumb-back" class="popup-thumb" src="" onclick="switchPopImage(this.src)">
+        </div>
+      </div>
+
+      <div class="popup-info">
+        <h2 id="pop-name">Product Name</h2>
+        <div id="pop-price" style="font-weight:bold; font-size: 1.4rem; color: var(--gold); margin-bottom: 8px;"></div>
+        <p id="pop-desc" class="popup-description">Product Description goes here...</p>
+
+        <div class="popup-form-group">
+          <label for="pop-size">Select Size</label>
+          <select id="pop-size" class="popup-input">
+            <option value="S">Small (S)</option>
+            <option value="M" selected>Medium (M)</option>
+            <option value="L">Large (L)</option>
+            <option value="XL">Extra Large (XL)</option>
+          </select>
+        </div>
+
+        <div class="popup-form-group">
+          <label for="pop-qty">Quantity</label>
+          <input type="number" id="pop-qty" class="popup-input" value="1" min="1">
+        </div>
+
+        <button class="btn-organic" onclick="handlePopupAdd(this)">Add to Cart</button>
+        <div id="pop-confirmation" class="confirmation">your drip has been added to cart</div>
+
+        <button class="btn-secondary" onclick="closePopup()">Continue Shopping</button>
+      </div>
+    </div>
+
+    <!-- Related Products inside Modal -->
+    <div class="related-products">
+      <h4>Other Related Drips</h4>
+      <div class="related-grid" id="related-grid">
+        <!-- Dynamically rendered related items -->
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Implementation -->
+  <script>
+    let currentCurrency = 'USD';
+    const exchangeRates = {
+      USD: { symbol: '$', rate: 1 },
+      EUR: { symbol: '€', rate: 0.92 },
+      GBP: { symbol: '£', rate: 0.78 },
+      NGN: { symbol: '₦', rate: 1500 }
+    };
+
+    let activePopupProduct = {
+      title: '',
+      frontImg: '',
+      backImg: '',
+      price: 0,
+      description: ''
+    };
+    
+    function updateWhatsAppMessage(productName) {
+      const whatsappBtn = document.getElementById('whatsappHelp');
+      if (whatsappBtn) {
+          // Double verified number configuration block
+          const targetNumber = "2349064575303";
+          const customizedText = `Hello Drip Support! I am currently checking out the "${productName}" and want to make an inquiry.`;
+          whatsappBtn.href = `https://wa.me{targetNumber}?text=${encodeURIComponent(customizedText)}`;
+      }
+  }
+    // Related products catalog mock
+    const relatedCatalog = [
+      { title: 'DSO Black M.O.B singlet', img: 'WhatsApp Image 2026-08-14 at 2.01.19 AM.jpeg', price: 20, desc: 'DripstarBlack M.O.B singlet.' },
+      { title: 'Dripstar nano crop top', img: 'WhatsApp Image 2026-07-13 at 1.44.35 AM.jpeg', price: 20, desc: 'DS0 plain black crop top.' },
+      { title: 'DS0 CURRENCIAGA NANO DRESS', img: 'W5 FRONT.jpeg', price: 15, desc: 'Dripstar CURRENCIAGA NANO DRESS.' }
+    ];
+
+    /* --- Dark & Light Mode Theme Management --- */
+    function initTheme() {
+      const savedTheme = localStorage.getItem('dripTheme') || 'dark';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      updateThemeButtonText(savedTheme);
+    }
+
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('dripTheme', newTheme);
+      updateThemeButtonText(newTheme);
+    }
+
+    function updateThemeButtonText(theme) {
+      const btn = document.getElementById('themeToggleBtn');
+      if (btn) {
+        if (theme === 'light') {
+          btn.innerText = '🌙 Dark';
+        } else {
+          btn.innerText = '☀️ Light';
+        }
+      }
+    }
+
+    // Execute theme initialization right away on script load
+    initTheme();
+
+    /* Navigation Menu Toggle & Auto-Close Outside */
+    function toggleMenu(event) {
+      if (event) event.stopPropagation();
+      document.getElementById('nav-links').classList.toggle('active');
+    }
+
+    document.addEventListener('click', function(event) {
+      const topNav = document.querySelector('.top-nav');
+      const navLinks = document.getElementById('nav-links');
+      
+      if (topNav && !topNav.contains(event.target)) {
+        navLinks.classList.remove('active');
+      }
+    });
+
+    /* Currency Switcher Handler */
+    function changeCurrency(currency) {
+      currentCurrency = currency;
+      const { symbol, rate } = exchangeRates[currency];
+
+      // Update grid prices
+      document.querySelectorAll('.sale-price, .old-price').forEach(elem => {
+        const usdVal = parseFloat(elem.getAttribute('data-usd'));
+        if (!isNaN(usdVal)) {
+          const converted = (usdVal * rate).toLocaleString(undefined, { maximumFractionDigits: 2 });
+          elem.innerText = `${symbol}${converted}`;
+        }
+      });
+
+      // Update active modal price
+      const popPriceElem = document.getElementById('pop-price');
+      if (popPriceElem && popPriceElem.getAttribute('data-usd')) {
+        const popUsd = parseFloat(popPriceElem.getAttribute('data-usd'));
+        const converted = (popUsd * rate).toLocaleString(undefined, { maximumFractionDigits: 2 });
+        popPriceElem.innerText = `${symbol}${converted}`;
+      }
+    }
+
+    /* Modal Image Switcher */
+    function switchPopImage(src) {
+      if (src) {
+        const mainImg = document.getElementById('pop-main-img');
+        mainImg.style.opacity = '0';
+        setTimeout(() => {
+          mainImg.src = src;
+          mainImg.style.opacity = '1';
+        }, 150);
+      }
+    }
+
+    /* Modal Popup Trigger */
+    function openPopup(title, frontImg, backImg, price, description) {
+      activePopupProduct = {
+        title: title || 'Drip Item',
+        frontImg: frontImg || '',
+        backImg: backImg || frontImg || '',
+        price: price || 0,
+        description: description || 'Premium Drip collection streetwear apparel.'
+      };
+
+      document.getElementById('pop-name').innerText = activePopupProduct.title;
+      document.getElementById('pop-desc').innerText = activePopupProduct.description;
+      document.getElementById('pop-main-img').src = activePopupProduct.frontImg;
+      document.getElementById('pop-thumb-front').src = activePopupProduct.frontImg;
+      document.getElementById('pop-thumb-back').src = activePopupProduct.backImg;
+      document.getElementById('pop-qty').value = 1;
+
+      const popPriceElem = document.getElementById('pop-price');
+      popPriceElem.setAttribute('data-usd', activePopupProduct.price);
+      
+      const { symbol, rate } = exchangeRates[currentCurrency];
+      const converted = (activePopupProduct.price * rate).toLocaleString(undefined, { maximumFractionDigits: 2 });
+      popPriceElem.innerText = `${symbol}${converted}`;
+
+      renderRelatedProducts();
+
+      document.getElementById('overlay').style.display = 'block';
+      document.getElementById('product-popup').style.display = 'block';
+
+      addToRecentlyViewed(activePopupProduct.title, activePopupProduct.frontImg, activePopupProduct.price);
+    }
+
+    function closePopup() {
+      document.getElementById('overlay').style.display = 'none';
+      document.getElementById('product-popup').style.display = 'none';
+      const popConfirm = document.getElementById('pop-confirmation');
+      if (popConfirm) popConfirm.style.display = 'none';
+    }
+
+    function renderRelatedProducts() {
+      const grid = document.getElementById('related-grid');
+      grid.innerHTML = '';
+      relatedCatalog.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'related-item';
+        div.onclick = () => openPopup(item.title, item.img, item.img, item.price, item.desc);
+        div.innerHTML = `
+          <img src="${item.img}" alt="${item.title}">
+          <p>${item.title}</p>
+          <span style="color:var(--gold); font-size:0.75rem; font-weight:bold;">$${item.price}</span>
+        `;
+        grid.appendChild(div);
+      });
+    }
+
+    /* LocalStorage Cart Management with Add Notification */
+    function addToCart(title, size, price, qty, img, description, btnElem) {
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+      const newItem = {
+        id: String(title).toLowerCase().replace(/\s+/g, '-'),
+        name: title || 'Drip Apparel',
+        title: title || 'Drip Apparel',
+        productName: title || 'Drip Apparel',
+        price: parseFloat(price) || 0,
+        size: size || 'M',
+        qty: parseInt(qty) || 1,
+        quantity: parseInt(qty) || 1,
+        img: img || '',
+        image: img || '',
+        description: description || ''
+      };
+
+      const existingIndex = cart.findIndex(
+        item => (item.title === title || item.name === title) && item.size === size
+      );
+
+      if (existingIndex > -1) {
+        cart[existingIndex].qty += newItem.qty;
+        cart[existingIndex].quantity = cart[existingIndex].qty;
+      } else {
+        cart.push(newItem);
+      }
+
+      localStorage.setItem('cart', JSON.stringify(cart));
+
+      // Show inline confirmation message below button
+      let msgElem = btnElem ? btnElem.nextElementSibling : null;
+      if (msgElem && msgElem.classList.contains('confirmation')) {
+        msgElem.style.display = 'block';
+        setTimeout(() => {
+          msgElem.style.display = 'none';
+        }, 3000);
+      }
+    }
+
+    /* Modal Add to Cart Action */
+    function handlePopupAdd(btnElem) {
+      const size = document.getElementById('pop-size').value;
+      const qty = parseInt(document.getElementById('pop-qty').value) || 1;
+
+      addToCart(
+        activePopupProduct.title,
+        size,
+        activePopupProduct.price,
+        qty,
+        activePopupProduct.frontImg,
+        activePopupProduct.description,
+        btnElem
+      );
+    }
+
+    function toggleWish(btn, title, id, price, img, description) {
+      btn.classList.toggle('active');
+      const isActive = btn.classList.contains('active');
+      
+      let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+      
+      if (isActive) {
+        const exists = wishlist.some(item => item.title === title);
+        if (!exists) {
+          wishlist.push({
+            id: id || title.toLowerCase().replace(/\s+/g, '-'),
+            title: title,
+            price: price,
+            img: img || '',
+            description: description || ''
+          });
+        }
+      } else {
+        wishlist = wishlist.filter(item => item.title !== title);
+      }
+      
+      localStorage.setItem('wishlist', JSON.stringify(wishlist));
+    }
+    
+    // Run on page load to ensure heart buttons reflect active wishlist status
+    window.addEventListener('DOMContentLoaded', () => {
+      const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+      document.querySelectorAll('.wish-btn').forEach(btn => {
+        const onclickAttr = btn.getAttribute('onclick');
+        if (onclickAttr) {
+          const match = onclickAttr.match(/toggleWish\(this,\s*'([^']+)'/);
+          if (match && match[1]) {
+            const productTitle = match[1];
+            if (wishlist.some(item => item.title === productTitle)) {
+              btn.classList.add('active');
+            }
+          }
+        }
+      });
+    });
+
+    /* Recently Viewed Feature */
+    function addToRecentlyViewed(name, img, price) {
+      const container = document.getElementById('rv-container');
+      const safeId = name.replace(/\s+/g, '-');
+      if (document.getElementById(`rv-${safeId}`)) return;
+
+      const item = document.createElement('div');
+      item.id = `rv-${safeId}`;
+      item.style.cssText = "min-width:110px; background:var(--card-bg); padding:8px; border-radius:8px; text-align:center; border: 1px solid var(--card-border); animation: fadeSlideUp 0.4s ease-out;";
+      item.innerHTML = `
+        <img src="${img}" style="width:100%; height:80px; object-fit:cover; border-radius:4px;">
+        <p style="font-size:0.75rem; color:var(--text-color); margin-top:4px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${name}</p>
+        <span style="font-size:0.8rem; color:var(--gold); font-weight:bold;">$${price}</span>
+      `;
+      container.appendChild(item);
+    }
+
+    function clearRecentlyViewed() {
+      document.getElementById('rv-container').innerHTML = '';
+
+    }
+    setInterval(() => {
+  // Find all viewer count elements on the page
+  const viewerElements = document.querySelectorAll('.view-count');
+  
+  viewerElements.forEach(element => {
+    // Get the current number of viewers
+    let currentCount = parseInt(element.textContent);
+    
+    // Generate a random change (-2, -1, 0, 1, or 2)
+    const change = Math.floor(Math.random() * 5) - 2;
+    let newCount = currentCount + change;
+    
+    // Keep the count realistic (never let it drop below 2)
+    if (newCount < 2) newCount = 2;
+    
+    // Update the text on the screen
+    element.textContent = newCount;
+  });
+}, 4000); // Updates every 4 seconds (4000 milliseconds)
+
+  </script>
+</body>
+</html>

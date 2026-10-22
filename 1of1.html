@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    h1{
+        text-align: center;
+        padding-top: 11%;
+        color: rgb(7, 20, 4);
+        font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    }
+
+    h2{
+color: aliceblue;
+text-align: center;
+    }
+
+    .shop{
+        font-style: ;
+    }
+
+
+HEAder{
+    padding-bottom: -10%;
+    font-size: large
+}
+
+.logintalk{
+   ;
+    text-align: center;
+padding: :left;
+
+}
+
+h3{
+    text-align: center;
+    color: rgb(0, 135, 25);
+     font-family: 'Courier New', Courier, monospace;
+     font-weight: 9100;
+     font-size: x-large;
+}
+
+.MOB{
+    display: flex;
+
+  justify-content: center;
+
+  flex-wrap: wrap;
+
+  gap: 26px;
+
+  margin:
+    65px
+    auto;
+
+  max-width: 450px;
+}
+
+
+.MOB a {
+  color: #f8f6f6;
+
+  text-decoration: none;
+
+  font-weight: 500;
+
+
+  letter-spacing: 0.14em;
+
+  text-transform: uppercase;
+
+  padding-bottom: 7px;
+
+  border-bottom:
+    1px solid
+    transparent;
+
+  transition:
+    color 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.35s var(--ease);
+}
+
+
+.MOB a:hover {
+  color:rgb(105, 216, 21);
+
+  border-color:
+    var(--gold-light);
+
+  transform:
+    translateY(-2px);
+}
+
+  /* Header & Navigation */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background: var(--header-bg);
+      border-bottom: 1px solid var(--card-border);
+      animation: fadeSlideUp 0.6s ease-out forwards;
+      position: relative;
+      z-index: 1000;
+      width: 100%;
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .logo img {
+      height: 40px;
+      max-width: 100%;
+      object-fit: contain;
+      transition: transform 0.3s ease;
+    }
+
+    .logo img:hover {
+      transform: scale(1.05);
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+    }
+
+    .currency-select, .theme-toggle-btn {
+      background: var(--card-bg);
+      color: var(--gold);
+      border: 1px solid var(--gold);
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-weight: bold;
+      font-size: 0.85rem;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.3s, box-shadow 0.3s, background 0.3s, color 0.3s;
+    }
+
+    .currency-select:hover, .theme-toggle-btn:hover {
+      box-shadow: 0 0 8px var(--gold-glow);
+    }
+
+    .menu-btn {
+      background: transparent;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      padding: 8px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 900;
+      font-size: large;
+      transition: background 0.3s, color 0.3s;
+      margin-left: -110%;
+    }
+
+    .menu-btn:hover {
+      background: var(--gold);
+      color: #7af308;
+    }
+
+    .nav-links {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 45px;
+      background: black;
+      border: 1px solid var(--card-border);
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      z-index: 1005;
+      min-width: 180px;
+      transition: background 0.3s ease, border-color 0.3s ease;
+      margin-right: ;
+    }
+
+    .nav-links.active {
+      display: block;
+      animation: fadeSlideUp 0.3s ease-out forwards;
+    }
+
+    .nav-links a {
+      color: var(--text-color);
+      text-decoration: none;
+      display: block;
+      margin-bottom: 0.8rem;
+      font-size: 0.95rem;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--gold);
+      transform: translateX(4px);
+    }
+
+    
+    @media (max-width: 480px) {
+      .product-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-controls {
+        gap: 6px;
+      }
+
+      .currency-select, .theme-toggle-btn {
+        padding: 6px 8px;
+        font-size: 0.75rem;
+      }
+
+      .menu-btn {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+      }
+    }
+
+    
+@media (max-width: 480px) { 
+    .product-grid { grid-template-columns: 1fr; } 
+    .nav-controls { gap: 6px; } 
+    .currency-select, .theme-toggle-btn { padding: 6px 8px; font-size: 0.75rem; }
+    .menu-btn { padding: 6px 10px; font-size: 0.8rem; } 
+} 
+
+
+/* DRIPSTAR PRODUCT POPUP — FULL IMAGE FIX */
+
+#product-popup {
+    width: min(96%, 1100px) !important;
+    max-width: 1100px !important;
+    max-height: 94vh !important;
+    max-height: 94dvh !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding: 20px !important;
+    box-sizing: border-box;
+}
+
+.popup-container {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr) !important;
+    gap: 24px !important;
+    align-items: start !important;
+}
+
+.popup-images {
+    width: 100%;
+    min-width: 0;
+}
+
+.popup-main-img {
+    display: block !important;
+    width: 100% !important;
+    height: clamp(320px, 62vh, 680px) !important;
+    max-height: 62vh !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    background: #0a0a0a;
+    border-radius: 10px;
+    padding: 6px;
+    box-sizing: border-box;
+}
+
+.popup-thumbs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.popup-thumb {
+    width: 65px !important;
+    height: 65px !important;
+    object-fit: contain !important;
+    background: #0a0a0a;
+    padding: 3px;
+    flex-shrink: 0;
+}
+
+/* Tablets and mobile phones */
+@media (max-width: 768px) {
+    #product-popup {
+        width: 96% !important;
+        max-height: 92vh !important;
+        max-height: 92dvh !important;
+        padding: 14px !important;
+        border-radius: 12px;
+    }
+
+    .popup-container {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 16px !important;
+    }
+
+    .popup-main-img {
+        height: min(55vh, 480px) !important;
+        height: min(55dvh, 480px) !important;
+        max-height: 55vh !important;
+        max-height: 55dvh !important;
+        min-height: 260px;
+        object-fit: contain !important;
+    }
+
+    .popup-info h2 {
+        font-size: 1.2rem;
+    }
+}
+
+/* Small phones */
+@media (max-width: 380px) {
+    #product-popup {
+        padding: 10px !important;
+    }
+
+    .popup-main-img {
+        min-height: 230px;
+        height: 48vh !important;
+        height: 48dvh !important;
+    }
+}
+
+
+</style>
+<body bgcolor="BLACK" >
+
+   <!-- Main Navigation Header --> 
+<header class="header" style="color: #f8f6f6;"> 
+    <div class="logo"> 
+        <h2><a href="index.html"><img src="WhatsApp Image 2026-07-15 at 3.20.36 AM.jpeg" alt="drip logo"></a></h2> 
+    </div> 
+
+        <nav class="top-nav"> 
+            <button class="menu-btn" onclick="toggleMenu(event)"; style="padding-right: 0%;" >  MENU </button> 
+            <div class="nav-links" id="nav-links"> 
+                <a href="index.html">Home</a> 
+                <a href="shop.html">Male Section</a> 
+                <a href="femaleshop.html">Female Section</a> 
+                <a href="wishlist.html">Wishlist</a> 
+                <a href="dripAbout.html">About</a> 
+                <a href="alllcart.html">Cart</a> 
+                <a href="driplogin.html">Login</a> 
+                <a href="1of1.html">1 of 1 shop</a> 
+            </div> 
+        </nav> 
+    
+    </div> 
+</header> 
+    <H1 style="background-color: white; padding-bottom: 4%; padding-top: 4%; font-family: 'Courier New', Courier, monospace;">DRIPSTAR ORIGINALS <br> [1 of 1 SECTION] 
+<br>
+       </H1>
+</HEAder>
+<h4 style="font-size: x-large; text-align: center;">
+ <div id="acc" style="color: rgb(21, 172, 39);"> RESTRICTED ACCESS </div><br> 
+</h4>
+
+  <h2 style="color: rgb(255, 255, 255);"> 
+         Exclussive acces only for client's that has made a confirmed purchase <br>
+         from the main female or male shop section.  
+  </h2>
+  <br>
+
+  <h3>
+
+    <h3>
+<p> login in to get an E.mail when the next <BR>  D.S.O ORIGINALS 1. 0f .1 
+    comes out slime </p> </h3> 
+
+  <div class="MOB">
+
+    <a href="driplogin.html">
+      LOGIN
+    </a>
+
+    <a href="register.html">
+      SIGN UP
+    </a>
+
+<SCript>
+    
+    /* Navigation Menu Toggle & Auto-Close Outside */
+    function toggleMenu(event) {
+      if (event) event.stopPropagation();
+      document.getElementById('nav-links').classList.toggle('active');
+    }
+
+    document.addEventListener('click', function(event) {
+      const topNav = document.querySelector('.top-nav');
+      const navLinks = document.getElementById('nav-links');
+      
+      if (topNav && !topNav.contains(event.target)) {
+        navLinks.classList.remove('active');
+      }
+    });
+
+    
+    function closePopup() {
+      document.getElementById('overlay').style.display = 'none';
+      document.getElementById('product-popup').style.display = 'none';
+      const popConfirm = document.getElementById('pop-confirmation');
+      if (popConfirm) popConfirm.style.display = 'none';
+    }
+
+
+</SCript>
+</body>
+</html>

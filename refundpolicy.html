@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Return & Refund Policy | Your Brand Name</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts for a fashion aesthetic -->
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link href="https://googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Work+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+
+<style>
+    /* Base Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Work Sans', sans-serif;
+    color: #2b2b2b;
+    line-height: 1.7;
+    background-color: #faf9f6; /* Elegant off-white background */
+    overflow-x: hidden;
+}
+
+/* Layout Utilities */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px;
+    width: 100%;
+}
+
+/* Header Design */
+.policy-header {
+    background-color: #1a1a1a; /* Sleek black header */
+    color: #ffffff;
+    text-align: center;
+    padding: 80px 20px 60px;
+    position: relative;
+}
+
+.back-to-shop {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    color: #b5a48c;
+    background: transparent;
+    border: 1px solid #b5a48c;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.back-to-shop:hover {
+    background-color: #b5a48c;
+    color: #1a1a1a;
+}
+
+.brand-sub {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: #b5a48c; /* Soft gold/champagne accent color */
+    display: block;
+    margin-bottom: 12px;
+}
+
+.policy-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 400;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+}
+
+.last-updated {
+    font-size: 0.9rem;
+    font-style: italic;
+    color: #a0a0a0;
+}
+
+/* Main Content Area */
+.policy-content {
+    padding: 60px 0;
+}
+
+.intro {
+    font-size: 1.15rem;
+    color: #4a4a4a;
+    margin-bottom: 40px;
+    border-left: 3px solid #b5a48c;
+    padding-left: 20px;
+}
+
+.policy-section {
+    margin-bottom: 45px;
+}
+
+.policy-section h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: #1a1a1a;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 8px;
+}
+
+.policy-section p {
+    margin-bottom: 16px;
+    font-size: 1rem;
+    word-wrap: break-word;
+}
+
+/* Unordered list styling */
+.policy-section ul {
+    list-style-type: none;
+    margin-bottom: 16px;
+}
+
+.policy-section ul li {
+    position: relative;
+    padding-left: 24px;
+    margin-bottom: 10px;
+    font-size: 0.95rem;
+    word-wrap: break-word;
+}
+
+.policy-section ul li::before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    color: #b5a48c;
+    font-weight: bold;
+}
+
+/* Step-by-step Ordered List Styling */
+.policy-steps {
+    list-style-type: none;
+    counter-reset: step-counter;
+    margin-bottom: 16px;
+}
+
+.policy-steps li {
+    counter-increment: step-counter;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 15px;
+    font-size: 0.95rem;
+    word-wrap: break-word;
+}
+
+.policy-steps li::before {
+    content: counter(step-counter);
+    position: absolute;
+    left: 0;
+    top: 2px;
+    background-color: #1a1a1a;
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: bold;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.contact-info {
+    font-style: normal;
+    background-color: #f2f0eb;
+    padding: 20px;
+    border-radius: 4px;
+    margin-top: 15px;
+    font-size: 0.95rem;
+    word-break: break-all;
+}
+
+.contact-info a {
+    color: #1a1a1a;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.3s ease;
+}
+
+.contact-info a:hover {
+    color: #b5a48c;
+}
+
+/* Footer Section */
+.policy-footer {
+    text-align: center;
+    padding: 40px 20px;
+    border-top: 1px solid #e5e5e5;
+    background-color: #ffffff;
+}
+
+.policy-footer p {
+    font-size: 0.85rem;
+    color: #777777;
+    letter-spacing: 0.5px;
+}
+
+/* Responsive Design tweaks */
+@media (max-width: 768px) {
+    .policy-header {
+        padding: 60px 15px 40px;
+    }
+    
+    .back-to-shop {
+        position: relative;
+        top: auto;
+        left: auto;
+        display: inline-block;
+        margin-bottom: 25px;
+    }
+
+    .policy-header h1 {
+        font-size: 2.2rem;
+    }
+
+    .policy-content {
+        padding: 40px 0;
+    }
+
+    .policy-section h2 {
+        font-size: 1.35rem;
+    }
+
+    .intro {
+        font-size: 1.05rem;
+        padding-left: 15px;
+    }
+}
+
+</style>
+<body>
+
+    <header class="policy-header">
+        <a href="shop.html" class="back-to-shop">&larr; Back to Shop</a>
+        <div class="container">
+            <span class="brand-sub">Returns & Exchanges</span>
+            <h1>Refund Policy</h1>
+            <p class="last-updated">Last Updated: July 10, 2026</p>
+        </div>
+    </header>
+
+    <main class="policy-content">
+        <div class="container">
+            <p class="intro">We want you to love your pieces as much as we loved creating them. If your purchase isn't a perfect fit, we are here to help you coordinate a seamless return or exchange.</p>
+
+            <section class="policy-section">
+                <h2>1. Return Window</h2>
+                <p>We accept return requests within <strong>10 days</strong> of your delivery date. Items sent back to us without first requesting a return will not be accepted.</p>
+            </section>
+
+            <section class="policy-section">
+                <h2>2. Eligibility Criteria</h2>
+                <p>To qualify for a full refund, your garments must meet the following strict conditions:</p>
+                <ul>
+                    <li>Items must be unworn, unwashed, and undamaged.</li>
+                    <li>All original tags, packaging, and designer labels must be securely attached.</li>
+                    <li>Free from alterations, cosmetics, perfume, or deodorant stains.</li>
+                </ul>
+            </section>
+
+            <section class="policy-section">
+                <h2>3. Non-Returnable Items</h2>
+                <p>The following items are considered final sale and cannot be returned or exchanged:</p>
+                <ul>
+                    <li>Custom-made, bespoke, or altered garments.</li>
+                    <li>Intimates/underwears, swimwear, and earrings (for hygiene reasons).</li>
+                    <li>Items purchased during final warehouse clearance sales.</li>
+                   
+                </ul>
+            </section>
+
+            <section class="policy-section">
+                <h2>4. The Process</h2>
+                <p>Follow these steps to complete your return:</p>
+                <ol class="policy-steps">
+                    <li>Visit our online Returns Portal or email <a href="mailto:dripsupport@dripstar.com">dripsupport@dripstar.com</a> with your order number.</li>
+                    <li>Once approved, we will email you a prepaid shipping label and instructions.</li>
+                    <li>Pack your items securely and drop the package off at your nearest designated courier.</li>
+                </ol>
+            </section>
+
+            <section class="policy-section">
+                <h2>5. Processing & Refunds</h2>
+                <p>Once we receive and inspect your item, we will notify you of the approval status. Approved refunds are processed automatically back to your original payment method within <strong>5 to 10 business days</strong>. Please note that banks or credit card providers may take additional time to post the transaction.</p>
+            </section>
+
+            <section class="policy-section">
+                <h2>6. Exchanges</h2>
+                <p>The fastest way to get a different size or color is to return your original item. Once your return is accepted, you can make a separate purchase for the new piece.</p>
+            </section>
+
+            <section class="policy-section">
+                <h2>7. Contact Our Concierge</h2>
+                <p>If you have any questions regarding your shipment, sizing concerns, or a damaged delivery, please contact us immediately:</p>
+                <address class="contact-info">
+                    Email: <a href="mailto:dripsupport@dripstar.com">dripsupport@dripstar.com</a><br>
+                    Hours: Monday – Friday, 9:00 AM – 5:00 PM (EST)
+                </address>
+            </section>
+        </div>
+    </main>
+
+    <footer class="policy-footer">
+        <div class="container">
+            <p>&copy; 2026 DRIPSTAR ORIGINALS. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
