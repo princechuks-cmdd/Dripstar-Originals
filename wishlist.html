@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Wishlist | Dripstar Fashion</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body { 
+      background-color: black; 
+      font-family: 'Segoe UI', sans-serif; 
+      color: white; 
+      margin: 0; 
+      padding: clamp(10px, 3vw, 25px); 
+      overflow-x: hidden; 
+    }
+    
+    .header { 
+      text-align: center; 
+      border-bottom: 2px solid #b8860b; 
+      padding-bottom: 20px; 
+      margin-bottom: 30px; 
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .nav-btn { 
+      display: inline-block; 
+      padding: 8px 20px; 
+      background: #333; 
+      color: #fff; 
+      text-decoration: none; 
+      border-radius: 20px; 
+      font-size: 0.85rem; 
+      transition: 0.3s; 
+    }
+    .nav-btn:hover { 
+      background: #b8860b; 
+      transform: translateY(-2px); 
+    }
+
+    .wish-container { 
+      max-width: 1100px; 
+      margin: 0 auto; 
+      width: 100%;
+    }
+
+    h1 { 
+      font-family: Georgia, serif; 
+      letter-spacing: 2px; 
+      text-transform: uppercase; 
+      font-size: clamp(1.5rem, 4vw, 2.2rem);
+      margin: 0 0 10px 0;
+    }
+
+    .currency-picker { 
+      background: #222; 
+      color: #b8860b; 
+      border: 1px solid #b8860b; 
+      padding: 6px 14px; 
+      border-radius: 15px; 
+      cursor: pointer; 
+      font-weight: bold; 
+      margin-bottom: 20px; 
+      font-size: 0.9rem;
+    }
+
+    .wish-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); 
+      gap: 25px; 
+    }
+    
+    .wish-card { 
+      background: #111; 
+      border-radius: 25px; 
+      padding: 18px; 
+      border: 1px solid #222; 
+      text-align: center; 
+      transition: 0.4s; 
+      position: relative; 
+    }
+    .wish-card:hover { 
+      transform: translateY(-8px); 
+      border-color: #ff00cc; 
+      box-shadow: 0 10px 30px rgba(255, 0, 204, 0.15); 
+    }
+
+    .clickable-view {
+      cursor: pointer;
+    }
+    
+    .wish-card img { 
+      width: 100%; 
+      height: 260px; 
+      object-fit: cover; 
+      border-radius: 20px; 
+      margin-bottom: 12px; 
+      transition: 0.3s; 
+    }
+    .wish-card img:hover { 
+      transform: scale(1.03); 
+    }
+
+    .remove-btn { 
+      position: absolute; 
+      top: 15px; 
+      right: 15px; 
+      background: rgba(0,0,0,0.7); 
+      color: #ff4444; 
+      border: 1px solid #ff4444; 
+      border-radius: 50%; 
+      width: 35px; 
+      height: 35px; 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      transition: 0.3s; 
+      z-index: 2;
+    }
+    .remove-btn:hover { 
+      background: #ff4444; 
+      color: white; 
+    }
+
+    .price-tag { 
+      color: #ff00cc; 
+      font-size: 1.2rem; 
+      font-weight: bold; 
+      margin: 8px 0; 
+    }
+
+    .product-desc {
+      font-size: 0.8rem;
+      color: #aaa;
+      margin-bottom: 10px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .btn-move { 
+      width: 100%; 
+      padding: 12px; 
+      background: linear-gradient(45deg, #ff00cc, #3333ff); 
+      color: white; 
+      border: none; 
+      border-radius: 25px; 
+      font-weight: bold; 
+      cursor: pointer; 
+      transition: 0.3s; 
+      margin-top: 10px;
+    }
+    .btn-move:hover { 
+      filter: brightness(1.2); 
+    }
+
+    .feedback-msg {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      color: #00ffcc;
+      font-weight: 500;
+      min-height: 20px;
+    }
+
+    .empty-state { 
+      text-align: center; 
+      padding: 80px 20px; 
+    }
+    .empty-state h2 { 
+      color: #666; 
+      font-size: clamp(1.2rem, 3vw, 1.6rem);
+    }
+    .shop-link { 
+      color: #b8860b; 
+      text-decoration: underline; 
+      font-weight: bold; 
+    }
+  </style>
+</head>
+<body onload="renderWishlist()">
+
+  <div class="header">
+    <h1>Dripstar Saved Drip</h1>
+    <div class="nav-container">
+      <a href="shop.html" class="nav-btn">← Back to Shop</a>
+      <a href="alllcart.html" class="nav-btn">View My Cart 🛒</a>
+    </div>
+  </div>
+
+  <div class="wish-container">
+    <div style="display: flex; justify-content: flex-end;">
+      <select class="currency-picker" id="currency-select" onchange="changeCurrency()">
+        <option value="USD">USD ($)</option>
+        <option value="NGN">NGN (₦)</option>
+      </select>
+    </div>
+
+    <div id="wish-grid-items" class="wish-grid"></div>
+
+    <div id="empty-msg" class="empty-state" style="display:none;">
+      <h2>Your wishlist is empty.</h2>
+      <p>Save the items you love to keep the drip on deck.</p>
+      <a href="shop.html" class="shop-link">Browse Collection</a>
+    </div>
+  </div>
+
+  <script>
+    const RATE = 1500;
+
+    // Helper to safely extract names across different shop data object configurations
+    function getValidName(item) {
+      return item.name || item.product || item.title || item.productName || item.itemName || "Drip Item";
+    }
+
+    // Helper to extract image URLs safely
+    function getValidImage(item) {
+      return item.img || item.image || item.thumbnail || item.picture || "";
+    }
+
+    // Helper to extract descriptions safely
+    function getValidDesc(item) {
+      return item.description || item.desc || item.details || "Premium street style drip collection.";
+    }
+
+    function renderWishlist() {
+      const cur = localStorage.getItem('prefCurrency') || 'USD';
+      document.getElementById('currency-select').value = cur;
+      
+      const wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
+      const cont = document.getElementById("wish-grid-items");
+      const empty = document.getElementById("empty-msg");
+
+      if(wishlist.length === 0) {
+        cont.innerHTML = "";
+        empty.style.display = "block";
+        return;
+      }
+      
+      empty.style.display = "none";
+      cont.innerHTML = "";
+
+      wishlist.forEach((item, index) => {
+        const itemPrice = Number(item.price || item.cost || 0);
+        const displayPrice = cur === 'NGN' ? '₦' + (itemPrice * RATE).toLocaleString() : '$' + itemPrice;
+        
+        const itemName = getValidName(item);
+        const itemImg = getValidImage(item);
+        const itemDesc = getValidDesc(item);
+        const productId = item.id || item.productId || encodeURIComponent(itemName);
+        
+        cont.innerHTML += `
+          <div class="wish-card">
+            <button class="remove-btn" onclick="removeWish(${index})" title="Remove Item">✕</button>
+            <div class="clickable-view" onclick="openShopProduct('${productId}')">
+              <img src="${itemImg}" alt="${itemName}">
+              <h3 style="margin:0 0 6px 0; font-size: 0.95rem;">${itemName}</h3>
+              <p class="product-desc">${itemDesc}</p>
+              <div class="price-tag">${displayPrice}</div>
+            </div>
+            <button class="btn-move" onclick="moveToCart(${index})">Move to cart</button>
+            <div id="msg-${index}" class="feedback-msg"></div>
+          </div>
+        `;
+      });
+    }
+
+    function openShopProduct(productId) {
+      window.location.href = `shop.html?product=${productId}`;
+    }
+
+    function removeWish(index) {
+      let wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
+      wishlist.splice(index, 1);
+      localStorage.setItem("wishlist", JSON.stringify(wishlist));
+      renderWishlist();
+    }
+
+    function moveToCart(index) {
+      let wishlist = JSON.parse(localStorage.getItem("wishlist")) || [];
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const item = wishlist[index];
+
+      const productName = getValidName(item);
+      const productImg = getValidImage(item);
+      const productDesc = getValidDesc(item);
+      const productPrice = Number(item.price || item.cost || 0);
+      const productSize = item.size || "M";
+
+      // Push structured data with synchronized naming conventions for allcart.html
+      cart.push({ 
+        product: productName, 
+        name: productName,
+        size: productSize, 
+        price: productPrice, 
+        quantity: 1, 
+        img: productImg, 
+        image: productImg,
+        description: productDesc 
+      });
+      
+      localStorage.setItem("cart", JSON.stringify(cart));
+
+      // Show inline notification
+      const msgEl = document.getElementById(`msg-${index}`);
+      if(msgEl) {
+        msgEl.textContent = "Added to cart successfully!";
+      }
+
+      // Remove from wishlist after short transition
+      setTimeout(() => {
+        wishlist.splice(index, 1);
+        localStorage.setItem("wishlist", JSON.stringify(wishlist));
+        renderWishlist();
+      }, 800);
+    }
+
+    function changeCurrency() {
+      localStorage.setItem('prefCurrency', document.getElementById('currency-select').value);
+      renderWishlist();
+    }
+  </script>
+</body>
+</html>
