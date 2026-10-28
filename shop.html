@@ -1,1630 +1,2894 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Drip Collection</title>
-  <style>
-    /* Base Theme Variables (Dark Mode Default) */
-    :root {
-      --drip-gradient: linear-gradient(135deg, #111111 0%, #333333 100%);
-      --gold: #d4af37;
-      --gold-hover: #e5c158;
-      --gold-glow: rgba(212, 175, 55, 0.4);
-      --bg-color: #0f0f0f;
-      --header-bg: #141414;
-      --card-bg: #1a1a1a;
-      --card-border: #2a2a2a;
-      --text-color: #ffffff;
-      --text-muted: #aaaaaa;
-      --success-green: #2ed573;
-      --popup-bg: #141414;
-      --input-bg: #222;
-      --input-border: #444;
-      --shipping-bg: #000;
-    }
-
-    /* Light Mode Theme Variables */
-    [data-theme="light"] {
-      --drip-gradient: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%);
-      --gold: #b89728;
-      --gold-hover: #d4af37;
-      --gold-glow: rgba(184, 151, 40, 0.3);
-      --bg-color: #f4f4f4;
-      --header-bg: #ffffff;
-      --card-bg: #ffffff;
-      --card-border: #e0e0e0;
-      --text-color: #111111;
-      --text-muted: #666666;
-      --success-green: #2ed573;
-      --popup-bg: #ffffff;
-      --input-bg: #f9f9f9;
-      --input-border: #ccc;
-      --shipping-bg: #1a1a1a;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      padding-bottom: 60px;
-      overflow-x: hidden;
-      width: 100%;
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-
-    /* Keyframe Animations */
-    @keyframes fadeSlideUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes pulseGlow {
-      0% {
-        box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
-      }
-      50% {
-        box-shadow: 0 0 22px rgba(212, 175, 55, 0.6);
-      }
-      100% {
-        box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
-      }
-    }
-
-    @keyframes livePulse {
-      0% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(46, 213, 115, 0.7);
-      }
-      70% {
-        transform: scale(1);
-        box-shadow: 0 0 0 8px rgba(46, 213, 115, 0);
-      }
-      100% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(46, 213, 115, 0);
-      }
-    }
-
-    @keyframes popIn {
-      0% {
-        opacity: 0;
-        transform: translate(-50%, -45%) scale(0.9);
-      }
-      100% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-      }
-    }
-
-    @keyframes confirmSlide {
-      from {
-        opacity: 0;
-        transform: translateY(-5px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* Free Shipping Bar */
-    #shipping-bar-container {
-      background: var(--shipping-bg);
-      color: #fff;
-      text-align: center;
-      padding: 10px;
-      font-size: 0.9rem;
-      position: sticky;
-      top: 0;
-      z-index: 999;
-      border-bottom: 1px solid var(--card-border);
-      width: 100%;
-      transition: background 0.3s ease;
-    }
-
-    #shipping-progress-fill {
-      background: var(--gold);
-      height: 100%;
-      width: 40%;
-      transition: width 0.5s ease-in-out;
-    }
-
-    /* Back to Top Button */
-    #backToTop {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: var(--gold);
-      color: #000;
-      border: none;
-      width: 45px;
-      height: 45px;
-      border-radius: 50%;
-      font-size: 1.2rem;
-      font-weight: bold;
-      cursor: pointer;
-      z-index: 1001;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      transition: transform 0.3s ease, background 0.3s ease;
-    }
-
-    #backToTop:hover {
-      transform: translateY(-3px) scale(1.05);
-      background: var(--gold-hover);
-    }
-
-    /* Floating Cart Button */
-    .cart-floating-container {
-      position: fixed;
-      bottom: 75px;
-      right: 20px;
-      background: var(--drip-gradient);
-      width: 55px;
-      height: 55px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 1001;
-      border: 1px solid var(--gold);
-      animation: pulseGlow 3s infinite ease-in-out;
-      transition: transform 0.3s ease;
-    }
-
-    .cart-floating-container:hover {
-      transform: scale(1.1) rotate(-5deg);
-    }
-
-    .cart-floating {
-      font-size: 1.6rem;
-    }
-
-    /* Header & Navigation */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 1.5rem;
-      background: var(--header-bg);
-      border-bottom: 1px solid var(--card-border);
-      animation: fadeSlideUp 0.6s ease-out forwards;
-      position: relative;
-      z-index: 1000;
-      width: 100%;
-      transition: background 0.3s ease, border-color 0.3s ease;
-    }
-
-    .logo img {
-      height: 40px;
-      max-width: 100%;
-      object-fit: contain;
-      transition: transform 0.3s ease;
-    }
-
-    .logo img:hover {
-      transform: scale(1.05);
-    }
-
-    .nav-controls {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      position: relative;
-    }
-
-    .currency-select, .theme-toggle-btn {
-      background: var(--card-bg);
-      color: var(--gold);
-      border: 1px solid var(--gold);
-      padding: 8px 10px;
-      border-radius: 4px;
-      font-weight: bold;
-      font-size: 0.85rem;
-      cursor: pointer;
-      outline: none;
-      transition: border-color 0.3s, box-shadow 0.3s, background 0.3s, color 0.3s;
-    }
-
-    .currency-select:hover, .theme-toggle-btn:hover {
-      box-shadow: 0 0 8px var(--gold-glow);
-    }
-
-    .menu-btn {
-      background: transparent;
-      border: 1px solid var(--gold);
-      color: var(--gold);
-      padding: 8px 14px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background 0.3s, color 0.3s;
-    }
-
-    .menu-btn:hover {
-      background: var(--gold);
-      color: #000;
-    }
-
-    .nav-links {
-      display: none;
-      position: absolute;
-      right: 0;
-      top: 45px;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      padding: 1rem;
-      border-radius: 8px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      z-index: 1005;
-      min-width: 180px;
-      transition: background 0.3s ease, border-color 0.3s ease;
-    }
-
-    .nav-links.active {
-      display: block;
-      animation: fadeSlideUp 0.3s ease-out forwards;
-    }
-
-    .nav-links a {
-      color: var(--text-color);
-      text-decoration: none;
-      display: block;
-      margin-bottom: 0.8rem;
-      font-size: 0.95rem;
-      transition: color 0.2s, transform 0.2s;
-    }
-
-    .nav-links a:hover {
-      color: var(--gold);
-      transform: translateX(4px);
-    }
-
-    /* Product Grid Layout */
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 20px;
-      padding: 1.5rem;
-      max-width: 1300px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    .product {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 1rem;
-      border: 1px solid var(--card-border);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s, border-color 0.3s, background 0.3s;
-      animation: fadeSlideUp 0.6s ease-out forwards;
-      width: 100%;
-    }
-
-    .product:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15), 0 0 15px var(--gold-glow);
-      border-color: var(--gold);
-    }
-
-    .wish-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: rgba(0, 0, 0, 0.6);
-      border: none;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      cursor: pointer;
-      font-size: 1rem;
-      color: #ff4757;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2;
-      transition: transform 0.2s ease, background 0.2s;
-    }
-
-    .wish-btn:hover {
-      transform: scale(1.15);
-      background: rgba(0, 0, 0, 0.85);
-    }
-
-    .wish-btn.active {
-      background: #ff4757;
-      color: #fff;
-    }
-
-    .product img {
-      width: 100%;
-      height: 250px;
-      object-fit: cover;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: transform 0.4s ease;
-    }
-
-    .product:hover img {
-      transform: scale(1.02);
-    }
-
-    .product-details {
-      margin-top: 1rem;
-    }
-
-    .live-viewers {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-bottom: 0.5rem;
-    }
-
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      background-color: #2ed573;
-      border-radius: 50%;
-      animation: livePulse 1.8s infinite ease-in-out;
-      flex-shrink: 0;
-    }
-
-    .old-price {
-      text-decoration: line-through;
-      color: var(--text-muted);
-      margin-right: 8px;
-      font-size: 0.9rem;
-    }
-
-    .sale-price {
-      font-weight: bold;
-      color: var(--gold);
-      font-size: 1.1rem;
-    }
-
-    .product p {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin: 8px 0;
-      line-height: 1.4;
-    }
-
-    .btn-organic {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      background: var(--gold);
-      color: #000;
-      border: none;
-      border-radius: 20px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background 0.2s, transform 0.15s ease, box-shadow 0.2s;
-    }
-
-    .btn-organic:hover {
-      background: var(--gold-hover);
-      box-shadow: 0 4px 12px var(--gold-glow);
-    }
-
-    .btn-organic:active {
-      transform: scale(0.96);
-    }
-
-    /* Confirmation Banner */
-    .confirmation {
-      display: none;
-      color: var(--success-green);
-      font-size: 0.85rem;
-      font-weight: 600;
-      text-align: center;
-      margin-top: 10px;
-      animation: confirmSlide 0.3s ease-out forwards;
-    }
-
-    /* Modern Professional Modal Styles */
-    #overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(8px);
-      z-index: 2000;
-      transition: opacity 0.3s ease;
-    }
-
-    #product-popup {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: var(--popup-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 1.5rem;
-      width: 90%;
-      max-width: 800px;
-      max-height: 90vh;
-      overflow-y: auto;
-      z-index: 2001;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-      transition: background 0.3s ease, border-color 0.3s ease;
-    }
-
-    .popup-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-    }
-
-    .popup-images {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .popup-main-img {
-      width: 100%;
-      height: 280px;
-      object-fit: cover;
-      border-radius: 10px;
-      border: 1px solid var(--card-border);
-      transition: opacity 0.2s ease;
-    }
-
-    .popup-thumbs {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .popup-thumb {
-      width: 60px;
-      height: 60px;
-      object-fit: cover;
-      border-radius: 6px;
-      cursor: pointer;
-      border: 1px solid var(--card-border);
-      transition: transform 0.2s, border-color 0.2s;
-    }
-
-    .popup-thumb:hover {
-      transform: scale(1.05);
-      border-color: var(--gold);
-    }
-
-    .popup-info h2 {
-      color: var(--gold);
-      margin-bottom: 0.5rem;
-      font-size: 1.3rem;
-    }
-
-    .popup-description {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      line-height: 1.5;
-      margin: 1rem 0;
-    }
-
-    .popup-form-group {
-      margin-bottom: 1rem;
-    }
-
-    .popup-form-group label {
-      display: block;
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 0.3rem;
-    }
-
-    .popup-input {
-      width: 100%;
-      padding: 10px;
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
-      color: var(--text-color);
-      border-radius: 6px;
-      outline: none;
-      transition: border-color 0.2s, background 0.3s, color 0.3s;
-    }
-
-    .popup-input:focus {
-      border-color: var(--gold);
-    }
-
-    .btn-secondary {
-      width: 100%;
-      background: transparent;
-      color: var(--text-muted);
-      border: 1px solid var(--input-border);
-      border-radius: 20px;
-      padding: 10px;
-      margin-top: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: color 0.2s, border-color 0.2s, background 0.2s;
-    }
-
-    .btn-secondary:hover {
-      color: var(--text-color);
-      border-color: var(--gold);
-      background: rgba(212, 175, 55, 0.05);
-    }
-
-    /* Related Products Section in Popup */
-    .related-products {
-      margin-top: 1.5rem;
-      border-top: 1px solid var(--card-border);
-      padding-top: 1rem;
-    }
-
-    .related-products h4 {
-      color: var(--gold);
-      margin-bottom: 1rem;
-      font-size: 1rem;
-    }
-
-    .related-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-      gap: 10px;
-    }
-
-    .related-item {
-      background: var(--card-bg);
-      border-radius: 8px;
-      padding: 6px;
-      text-align: center;
-      cursor: pointer;
-      border: 1px solid var(--card-border);
-      transition: transform 0.2s, border-color 0.2s;
-    }
-
-    .related-item:hover {
-      transform: translateY(-3px);
-      border-color: var(--gold);
-    }
-
-    .related-item img {
-      width: 100%;
-      height: 70px;
-      object-fit: cover;
-      border-radius: 4px;
-    }
-
-    .related-item p {
-      font-size: 0.7rem;
-      color: var(--text-color);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-top: 4px;
-    }
-
-    /* Recently Viewed Section */
-    #recently-viewed-section {
-      max-width: 1300px;
-      margin: 2rem auto 1rem auto;
-      padding: 0 1.5rem;
-      width: 100%;
-    }
-
-    .rv-container {
-      display: flex;
-      gap: 15px;
-      overflow-x: auto;
-      padding-bottom: 10px;
-    }
-
-    .btn-clear-rv {
-      background: transparent;
-      border: 1px solid var(--input-border);
-      color: var(--text-muted);
-      padding: 4px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: color 0.2s, border-color 0.2s;
-    }
-
-    .btn-clear-rv:hover {
-      color: var(--text-color);
-      border-color: var(--gold);
-    }
-
-    /* Media Queries for Full Responsiveness */
-    @media (max-width: 768px) {
-      .header {
-        padding: 0.8rem 1rem;
-      }
-
-      .logo img {
-        height: 35px;
-      }
-
-      .product-grid {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-        gap: 12px;
-        padding: 1rem;
-      }
-
-      .product img {
-        height: 180px;
-      }
-
-      .popup-container {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-      }
-
-      .popup-main-img {
-        height: 220px;
-      }
-
-      #product-popup {
-        padding: 1rem;
-        width: 95%;
-      }
-
-      #backToTop {
-        bottom: 15px;
-        right: 15px;
-        width: 40px;
-        height: 40px;
-      }
-
-      .cart-floating-container {
-        bottom: 65px;
-        right: 15px;
-        width: 50px;
-        height: 50px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .product-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .nav-controls {
-        gap: 6px;
-      }
-
-      .currency-select, .theme-toggle-btn {
-        padding: 6px 8px;
-        font-size: 0.75rem;
-      }
-
-      .menu-btn {
-        padding: 6px 10px;
-        font-size: 0.8rem;
-      }
-    }
-
-    #backToTop { 
-    position: fixed;
-    bottom: 15px; 
-    right: 15px; 
-    width: 40px; 
-    height: 40px; 
-    z-index: 1000;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f0f0f">
+<title>Drip Collection | Dripstar Originals</title>
+
+<style>
+:root {
+  --drip-gradient: linear-gradient(135deg,#111,#333);
+  --gold: #d4af37;
+  --gold-hover: #e5c158;
+  --gold-glow: rgba(212,175,55,.4);
+  --bg-color: #0f0f0f;
+  --header-bg: #141414;
+  --card-bg: #1a1a1a;
+  --card-border: #2a2a2a;
+  --text-color: #fff;
+  --text-muted: #aaa;
+  --success-green: #2ed573;
+  --popup-bg: #141414;
+  --input-bg: #222;
+  --input-border: #444;
+  --shipping-bg: #000;
 }
 
-.cart-floating-container { 
-    position: fixed;
-    bottom: 65px; 
-    right: 15px; 
-    width: 50px; 
-    height: 50px; 
-    z-index: 1000;
-}
-/* Base configurations for the floating layout stack */
-#backToTop { 
-    position: fixed;
-    bottom: 15px; 
-    right: 15px; 
-    width: 40px; 
-    height: 40px; 
-    z-index: 1000;
-    cursor: pointer;
+[data-theme="light"] {
+  --drip-gradient: linear-gradient(135deg,#e0e0e0,#f5f5f5);
+  --gold: #b89728;
+  --gold-hover: #d4af37;
+  --gold-glow: rgba(184,151,40,.3);
+  --bg-color: #f4f4f4;
+  --header-bg: #fff;
+  --card-bg: #fff;
+  --card-border: #e0e0e0;
+  --text-color: #111;
+  --text-muted: #666;
+  --popup-bg: #fff;
+  --input-bg: #f9f9f9;
+  --input-border: #ccc;
+  --shipping-bg: #1a1a1a;
 }
 
-.cart-floating-container { 
-    position: fixed;
-    bottom: 65px; 
-    right: 15px; 
-    width: 50px; 
-    height: 50px; 
-    z-index: 1000;
-    cursor: pointer;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
 }
 
-/* WhatsApp Floating Container Wrapper */
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg-color);
+  color: var(--text-color);
+  padding-bottom: 60px;
+  overflow-x: hidden;
+  width: 100%;
+  transition: background .3s,color .3s;
+}
+
+button,select,input { font: inherit; }
+
+button { -webkit-tap-highlight-color: transparent; }
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+  0%,100% { box-shadow: 0 0 10px rgba(212,175,55,.2); }
+  50% { box-shadow: 0 0 22px rgba(212,175,55,.6); }
+}
+
+@keyframes livePulse {
+  0%,100% { transform: scale(.95); }
+  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(46,213,115,0); }
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: translate(-50%,-45%) scale(.96); }
+  to { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+}
+
+@keyframes confirmSlide {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* SHIPPING BAR */
+#shipping-bar-container {
+  background: var(--shipping-bg);
+  color: #fff;
+  text-align: center;
+  padding: 10px;
+  font-size: .9rem;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  border-bottom: 1px solid var(--card-border);
+}
+
+#shipping-progress-fill {
+  background: var(--gold);
+  height: 100%;
+  width: 40%;
+  transition: width .5s;
+}
+
+/* FLOATING BUTTONS */
+#backToTop,.cart-floating-container {
+  position: fixed;
+  right: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+  cursor: pointer;
+}
+
+#backToTop {
+  bottom: 15px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: var(--gold);
+  color: #000;
+  font-size: 1.2rem;
+  font-weight: bold;
+  box-shadow: 0 4px 10px #0004;
+  transition: transform .3s,background .3s;
+}
+
+#backToTop:hover { transform: translateY(-3px); background: var(--gold-hover); }
+
+.cart-floating-container {
+  bottom: 65px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--drip-gradient);
+  border: 1px solid var(--gold);
+  animation: pulseGlow 3s infinite;
+  transition: transform .3s;
+}
+
+.cart-floating-container:hover { transform: scale(1.08); }
+.cart-floating { font-size: 1.6rem; }
+
+/* WHATSAPP SUPPORT */
 #whatsappHelp {
-    position: fixed;
-    bottom: 125px; 
-    right: 20px;   
-    width: 40px;
-    height: 40px;
-    background-color: #25D366;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    z-index: 1000;
-    transition: transform 0.2s ease, background-color 0.2s ease;
-    text-decoration: none;
+  position: fixed;
+  bottom: 125px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background: #25d366;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 10px #0004;
+  z-index: 1000;
+  transition: transform .2s,background .2s;
+  text-decoration: none;
 }
 
-/* SVG Vector Sizing */
-#whatsappHelp svg {
-    width: 22px;
-    height: 22px;
-    fill: #ffffff;
-    z-index: 2;
-}
+#whatsappHelp svg { width: 22px; height: 22px; fill: #fff; }
 
-/* NEW: Text Bubble Label */
 .whatsapp-label {
-    position: absolute;
-    right: 50px; /* Positions bubble directly to the left of the button icon */
-    background-color: #111111;
-    color: #ffffff;
-    font-family: Arial, sans-serif;
-    font-size: 12px;
-    font-weight: bold;
-    padding: 6px 12px;
-    border-radius: 6px;
-    white-space: nowrap;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    pointer-events: none; /* Prevents text layer from blocking pointer inputs */
-    opacity: 0;
-    transform: translateX(10px);
-    transition: opacity 0.3s ease, transform 0.3s ease;
+  position: absolute;
+  right: 50px;
+  background: #111;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 6px 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(10px);
+  transition: opacity .3s,transform .3s;
 }
 
-/* Text Bubble Tail Little Triangle */
 .whatsapp-label::after {
-    content: '';
-    position: absolute;
-    right: -4px;
-    top: 50%;
-    transform: translateY(-50%);
-    border-width: 4px 0 4px 4px;
-    border-style: solid;
-    border-color: transparent transparent transparent #111111;
+  content: "";
+  position: absolute;
+  right: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-width: 4px 0 4px 4px;
+  border-style: solid;
+  border-color: transparent transparent transparent #111;
 }
 
-/* Hover Actions: Scales icon and displays text label cleanly */
-#whatsappHelp:hover {
-    transform: scale(1.05);
-    background-color: #20ba5a;
-}
+#whatsappHelp:hover { transform: scale(1.05); background: #20ba5a; }
+#whatsappHelp:hover .whatsapp-label { opacity: 1; transform: translateX(0); }
 
-#whatsappHelp:hover .whatsapp-label {
-    opacity: 1;
-    transform: translateX(0);
-}
-
-/* Active Support Live Pulsing Indicator Dot */
 #whatsappHelp::after {
-    content: '';
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    width: 10px;
-    height: 10px;
-    background-color: #00FF00;
-    border: 2px solid #25D366;  
-    border-radius: 50%;
-    box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.7);
-    animation: pulseBadge 1.8s infinite;
-    z-index: 3;
+  content: "";
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  background: #00ff00;
+  border: 2px solid #25d366;
+  border-radius: 50%;
+  animation: pulseBadge 1.8s infinite;
 }
 
 @keyframes pulseBadge {
-    0% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.7);
-    }
-    70% {
-        transform: scale(1);
-        box-shadow: 0 0 0 6px rgba(0, 255, 0, 0);
-    }
-    100% {
-        transform: scale(0.95);
-        box-shadow: 0 0 0 0 rgba(0, 255, 0, 0);
-    }
+  0%,100% { box-shadow: 0 0 0 0 #00ff00b3; }
+  70% { box-shadow: 0 0 0 6px #00ff0000; }
 }
 
-.popup-container { grid-template-columns: 1fr; gap: 1rem; } 
-.popup-main-img { height: 220px; } 
-#product-popup { padding: 1rem; width: 95%; } 
-
-/* Responsive Rules Configuration */
-@media (max-width: 768px) {
-    #backToTop { bottom: 15px; right: 15px; }
-    .cart-floating-container { bottom: 65px; right: 15px; }
-    #whatsappHelp { bottom: 125px; right: 20px; }
-    
-    /* Keep label hidden on small screens to prevent covering up card imagery */
-    .whatsapp-label { display: none; } 
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding: 1rem 1.5rem;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--card-border);
+  position: relative;
+  z-index: 1000;
+  width: 100%;
+  animation: fadeSlideUp .6s ease-out;
 }
 
-@media (max-width: 480px) { 
-    .product-grid { grid-template-columns: 1fr; } 
-    .nav-controls { gap: 6px; } 
-    .currency-select, .theme-toggle-btn { padding: 6px 8px; font-size: 0.75rem; }
-    .menu-btn { padding: 6px 10px; font-size: 0.8rem; } 
-} 
+.logo img {
+  display: block;
+  height: 40px;
+  max-width: 180px;
+  object-fit: contain;
+  transition: transform .3s;
+}
 
+.logo img:hover { transform: scale(1.05); }
 
-/* DRIPSTAR PRODUCT POPUP — FULL IMAGE FIX */
+.nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.currency-select,.theme-toggle-btn,.menu-btn {
+  background: var(--card-bg);
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  padding: 8px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: .85rem;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.currency-select:hover,.theme-toggle-btn:hover { box-shadow: 0 0 8px var(--gold-glow); }
+
+.menu-btn { background: transparent; }
+.menu-btn:hover { background: var(--gold); color: #000; }
+
+.top-nav { position: relative; }
+
+.nav-links {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 45px;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px #0003;
+  z-index: 1005;
+  min-width: 180px;
+}
+
+.nav-links.active { display: block; animation: fadeSlideUp .3s; }
+
+.nav-links a {
+  color: var(--text-color);
+  text-decoration: none;
+  display: block;
+  margin-bottom: .8rem;
+  font-size: .95rem;
+  transition: color .2s,transform .2s;
+}
+
+.nav-links a:last-child { margin-bottom: 0; }
+.nav-links a:hover { color: var(--gold); transform: translateX(4px); }
+
+/* PRODUCT GRID */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(240px,1fr));
+  gap: 20px;
+  padding: 1.5rem;
+  max-width: 1300px;
+  margin: 0 auto;
+  width: 100%;
+  align-items: stretch;
+}
+
+.product {
+  position: relative;
+  min-width: 0;
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid var(--card-border);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform .3s,box-shadow .3s,border-color .3s,background .3s;
+  animation: fadeSlideUp .6s ease-out;
+}
+
+.product[hidden] { display: none !important; }
+
+.product:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px #0003,0 0 15px var(--gold-glow);
+  border-color: var(--gold);
+}
+
+.wish-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #0009;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #ff4757;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  transition: transform .2s,background .2s;
+}
+
+.wish-btn:hover { transform: scale(1.15); background: #000d; }
+.wish-btn.active { background: #ff4757; color: #fff; }
+
+/*
+  MAIN SHOP IMAGE STAGE
+  JavaScript creates this around each product image.
+*/
+.product-image-stage {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #0a0a0a;
+  touch-action: pan-y;
+}
+
+.product-image-stage > img {
+  display: block;
+  width: 100%;
+  height: 250px;
+  object-fit: contain;
+  object-position: center;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-drag: none;
+  transition: opacity .2s,transform .3s;
+}
+
+.product-image-stage:hover > img { transform: scale(1.015); }
+
+.product-image-stage::after {
+  content: "SWIPE FOR BACK VIEW";
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #000a;
+  color: #fff;
+  font-size: 9px;
+  letter-spacing: 1px;
+  padding: 5px 8px;
+  border-radius: 15px;
+  pointer-events: none;
+  white-space: nowrap;
+  opacity: .8;
+}
+
+.product-image-stage.no-back-view::after { content: "VIEW PRODUCT"; }
+
+/* Product image arrows appear on hover for mouse users */
+.product-swipe-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
+  width: 30px;
+  height: 38px;
+  border: 1px solid #d4af3780;
+  border-radius: 4px;
+  background: #000b;
+  color: var(--gold);
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .2s,background .2s;
+}
+
+.product-image-stage:hover .product-swipe-arrow,
+.product-image-stage:focus-within .product-swipe-arrow { opacity: 1; }
+
+.product-swipe-arrow.prev { left: 6px; }
+.product-swipe-arrow.next { right: 6px; }
+
+.product-swipe-arrow:hover { background: var(--gold); color: #000; }
+
+.product-details { margin-top: 1rem; }
+
+.live-viewers {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .75rem;
+  color: var(--text-muted);
+  margin-bottom: .5rem;
+  min-height: 15px;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--success-green);
+  border-radius: 50%;
+  animation: livePulse 1.8s infinite;
+  flex-shrink: 0;
+}
+
+.old-price {
+  text-decoration: line-through;
+  color: var(--text-muted);
+  margin-right: 8px;
+  font-size: .9rem;
+}
+
+.sale-price { font-weight: bold; color: var(--gold); font-size: 1.1rem; }
+
+.product p {
+  font-size: .85rem;
+  color: var(--text-muted);
+  margin: 8px 0;
+  line-height: 1.5;
+}
+
+.btn-organic {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  background: var(--gold);
+  color: #000;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background .2s,transform .15s,box-shadow .2s;
+}
+
+.btn-organic:hover { background: var(--gold-hover); box-shadow: 0 4px 12px var(--gold-glow); }
+.btn-organic:active { transform: scale(.97); }
+
+.confirmation {
+  display: none;
+  color: var(--success-green);
+  font-size: .85rem;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 10px;
+  animation: confirmSlide .3s;
+}
+
+/* POPUP OVERLAY */
+#overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #000c;
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+}
 
 #product-popup {
-    width: min(96%, 1100px) !important;
-    max-width: 1100px !important;
-    max-height: 94vh !important;
-    max-height: 94dvh !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    padding: 20px !important;
-    box-sizing: border-box;
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  background: var(--popup-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 20px;
+  width: min(96%,1100px);
+  max-height: 94vh;
+  max-height: 94dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 2001;
+  box-shadow: 0 25px 50px #0005;
+  animation: popIn .3s;
 }
 
 .popup-container {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr) !important;
-    gap: 24px !important;
-    align-items: start !important;
+  display: grid;
+  grid-template-columns: minmax(0,1.15fr) minmax(0,.85fr);
+  gap: 24px;
+  align-items: start;
 }
 
-.popup-images {
-    width: 100%;
-    min-width: 0;
+.popup-images { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+
+.popup-image-stage {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #0a0a0a;
+  touch-action: pan-y;
 }
 
 .popup-main-img {
-    display: block !important;
-    width: 100% !important;
-    height: clamp(320px, 62vh, 680px) !important;
-    max-height: 62vh !important;
-    object-fit: contain !important;
-    object-position: center !important;
-    background: #0a0a0a;
-    border-radius: 10px;
-    padding: 6px;
-    box-sizing: border-box;
+  display: block;
+  width: 100%;
+  height: clamp(320px,62vh,680px);
+  max-height: 62vh;
+  object-fit: contain;
+  object-position: center;
+  background: #0a0a0a;
+  border-radius: 10px;
+  padding: 6px;
+  user-select: none;
+  -webkit-user-drag: none;
+  transition: opacity .2s;
 }
 
 .popup-thumbs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
 }
 
 .popup-thumb {
-    width: 65px !important;
-    height: 65px !important;
-    object-fit: contain !important;
-    background: #0a0a0a;
-    padding: 3px;
-    flex-shrink: 0;
+  width: 65px;
+  height: 65px;
+  object-fit: contain;
+  background: #0a0a0a;
+  padding: 3px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid var(--card-border);
+  flex-shrink: 0;
 }
 
-/* Tablets and mobile phones */
+.popup-thumb:hover,.popup-thumb.active { border-color: var(--gold); }
+
+.popup-swipe-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  width: 40px;
+  height: 48px;
+  border: 1px solid #d4af37a6;
+  border-radius: 5px;
+  background: #000b;
+  color: var(--gold);
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .2s,color .2s;
+}
+
+.popup-swipe-arrow:hover { background: var(--gold); color: #000; }
+.popup-swipe-arrow.prev { left: 10px; }
+.popup-swipe-arrow.next { right: 10px; }
+
+.popup-swipe-hint {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  padding: 6px 10px;
+  border-radius: 20px;
+  background: #000a;
+  color: #fff;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.popup-info { min-width: 0; }
+.popup-info h2 { color: var(--gold); margin-bottom: .5rem; font-size: 1.3rem; }
+
+.popup-description {
+  color: var(--text-muted);
+  font-size: .9rem;
+  line-height: 1.5;
+  margin: 1rem 0;
+}
+
+.popup-form-group { margin-bottom: 1rem; }
+
+.popup-form-group label {
+  display: block;
+  font-size: .85rem;
+  color: var(--text-muted);
+  margin-bottom: .3rem;
+}
+
+.popup-input {
+  width: 100%;
+  padding: 10px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  color: var(--text-color);
+  border-radius: 6px;
+  outline: none;
+}
+
+.popup-input:focus { border-color: var(--gold); }
+
+.btn-secondary {
+  width: 100%;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--input-border);
+  border-radius: 20px;
+  padding: 10px;
+  margin-top: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-secondary:hover { color: var(--text-color); border-color: var(--gold); }
+
+.related-products {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--card-border);
+  padding-top: 1rem;
+}
+
+.related-products h4 { color: var(--gold); margin-bottom: 1rem; font-size: 1rem; }
+
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(80px,1fr));
+  gap: 10px;
+}
+
+.related-item {
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 6px;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid var(--card-border);
+  transition: transform .2s,border-color .2s;
+}
+
+.related-item:hover { transform: translateY(-3px); border-color: var(--gold); }
+
+.related-item img {
+  width: 100%;
+  height: 70px;
+  object-fit: contain;
+  background: #0a0a0a;
+  border-radius: 4px;
+}
+
+.related-item p {
+  font-size: .7rem;
+  color: var(--text-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 4px;
+}
+
+/* RECENTLY VIEWED */
+#recently-viewed-section {
+  max-width: 1300px;
+  margin: 2rem auto 1rem;
+  padding: 0 1.5rem;
+  width: 100%;
+}
+
+.rv-container { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; }
+
+.btn-clear-rv {
+  background: transparent;
+  border: 1px solid var(--input-border);
+  color: var(--text-muted);
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-clear-rv:hover { color: var(--text-color); border-color: var(--gold); }
+
+/* PAGINATION */
+.shop-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 16px 40px;
+}
+
+.shop-pagination button {
+  min-width: 42px;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--card-border);
+  border-radius: 5px;
+  background: var(--card-bg);
+  color: var(--text-color);
+  cursor: pointer;
+  transition: .2s;
+}
+
+.shop-pagination button:hover:not(:disabled),
+.shop-pagination button.active {
+  background: var(--gold);
+  color: #000;
+  border-color: var(--gold);
+}
+
+.shop-pagination button:disabled { opacity: .35; cursor: not-allowed; }
+
+.shop-pagination button:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* RESPONSIVE */
 @media (max-width: 768px) {
-    #product-popup {
-        width: 96% !important;
-        max-height: 92vh !important;
-        max-height: 92dvh !important;
-        padding: 14px !important;
-        border-radius: 12px;
-    }
-
-    .popup-container {
-        grid-template-columns: minmax(0, 1fr) !important;
-        gap: 16px !important;
-    }
-
-    .popup-main-img {
-        height: min(55vh, 480px) !important;
-        height: min(55dvh, 480px) !important;
-        max-height: 55vh !important;
-        max-height: 55dvh !important;
-        min-height: 260px;
-        object-fit: contain !important;
-    }
-
-    .popup-info h2 {
-        font-size: 1.2rem;
-    }
+  .header { padding: .8rem 1rem; }
+  .logo img { height: 35px; max-width: 130px; }
+  .nav-controls { gap: 6px; }
+  .product-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; padding: 1rem; }
+  .product { padding: .7rem; }
+  .product-image-stage > img { height: 200px; }
+  .popup-container { grid-template-columns: minmax(0,1fr); gap: 16px; }
+  #product-popup { width: 96%; max-height: 92vh; max-height: 92dvh; padding: 14px; border-radius: 12px; }
+  .popup-main-img { height: min(55vh,480px); height: min(55dvh,480px); max-height: 55vh; max-height: 55dvh; min-height: 260px; }
+  .popup-info h2 { font-size: 1.2rem; }
+  .popup-swipe-arrow { width: 34px; height: 42px; }
+  .popup-swipe-hint { font-size: 9px; }
+  #backToTop { bottom: 15px; right: 15px; }
+  .cart-floating-container { bottom: 65px; right: 15px; }
+  #whatsappHelp { bottom: 125px; right: 20px; }
+  .whatsapp-label { display: none; }
 }
 
-/* Small phones */
-@media (max-width: 380px) {
-    #product-popup {
-        padding: 10px !important;
-    }
-
-    .popup-main-img {
-        min-height: 230px;
-        height: 48vh !important;
-        height: 48dvh !important;
-    }
+@media (max-width: 480px) {
+  .header { gap: 8px; }
+  .logo img { max-width: 100px; height: 32px; }
+  .currency-select,.theme-toggle-btn { padding: 6px; font-size: .72rem; }
+  .menu-btn { padding: 6px 8px; font-size: .75rem; }
+  .product-grid { gap: 10px; padding: .7rem; }
+  .product { padding: .55rem; border-radius: 9px; }
+  .product-image-stage > img { height: 175px; }
+  .product-details { margin-top: .7rem; }
+  .product p { font-size: .8rem; }
+  .btn-organic { padding: 9px 6px; font-size: .8rem; }
+  .old-price { font-size: .8rem; margin-right: 4px; }
+  .sale-price { font-size: 1rem; }
+  #product-popup { padding: 10px; }
+  .popup-main-img { min-height: 230px; height: 48vh; height: 48dvh; }
+  .shop-pagination { gap: 6px; }
+  .shop-pagination button { min-width: 36px; height: 38px; padding: 0 9px; }
 }
 
+@media (max-width: 340px) {
+  .product-grid { grid-template-columns: 1fr; }
+  .product-image-stage > img { height: 250px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,*::before,*::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
 </style>
 </head>
+
 <body>
-  <div id="shipping-bar-container"> 
-    <span id="shipping-text">You're $500 away from FREE SHIPPING!</span> 
-    <div style="background: rgba(128,128,128,0.2); height: 6px; width: 60%; margin: 5px auto; border-radius: 10px; overflow: hidden;"> 
-        <div id="shipping-progress-fill"></div> 
-    </div> 
-</div> 
 
-<!-- Back to Top Floating Button --> 
-<button id="backToTop" onclick="window.scrollTo({top:0, behavior:'smooth'})">↑</button>
-
-<!-- Floating Cart Icon --> 
-<div class="cart-floating-container" onclick="window.location.href='alllcart.html'"> 
-    <span class="cart-floating">🛒</span> 
+<div id="shipping-bar-container">
+  <span id="shipping-text">You're $500 away from FREE SHIPPING!</span>
+  <div style="background:rgba(128,128,128,.2);height:6px;width:60%;margin:5px auto;border-radius:10px;overflow:hidden;">
+    <div id="shipping-progress-fill"></div>
+  </div>
 </div>
 
-<!-- Native HTML Anchor Link Routing to WhatsApp with live nested label -->
-<a id="whatsappHelp" href="https://wa.me/2349064575303" target="_blank" rel="noopener noreferrer" title="Support is Online">
-    <!-- Text Label Inside Container -->
-    <span class="whatsapp-label">Chat with Drip-Support</span>
-    
-    <svg xmlns="http://w3.org" viewBox="0 0 448 512">
-        <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7 .9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
-    </svg>
+<button id="backToTop" type="button" aria-label="Back to top"
+        onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<div class="cart-floating-container" role="link" tabindex="0"
+     aria-label="Open shopping cart"
+     onclick="window.location.href='alllcart.html'"
+     onkeydown="if(event.key==='Enter')window.location.href='alllcart.html'">
+  <span class="cart-floating">🛒</span>
+</div>
+
+<a id="whatsappHelp" href="https://wa.me/2349064575303"
+   target="_blank" rel="noopener noreferrer" title="Chat with Drip Support">
+  <span class="whatsapp-label">Chat with Drip-Support</span>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" aria-hidden="true">
+    <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/>
+  </svg>
 </a>
-<!-- Main Navigation Header --> 
-<header class="header"> 
-    <div class="logo"> 
-        <h2><a href="index.html"><img src="WhatsApp Image 2026-07-15 at 3.20.36 AM.jpeg" alt="drip logo"></a></h2> 
-    </div> 
-    <div class="nav-controls"> 
-        <button id="themeToggleBtn" class="theme-toggle-btn" onclick="toggleTheme()">☀%EF%B8%8F Light</button> 
-        <select id="currency-select" class="currency-select" onchange="changeCurrency(this.value)"> 
-            <option value="USD">USD ($)</option> 
-            <option value="EUR">EUR (€)</option> 
-            <option value="GBP">GBP (£)</option> 
-            <option value="NGN">NGN (₦)</option> 
-        </select> 
-        <nav class="top-nav"> 
-            <button class="menu-btn" onclick="toggleMenu(event)"> ☰ MENU </button> 
-            <div class="nav-links" id="nav-links"> 
-                <a href="index.html">Home</a> 
-                <a href="shop.html">Male Section</a> 
-                <a href="femaleshop.html">Female Section</a> 
-                <a href="wishlist.html">Wishlist</a> 
-                <a href="dripAbout.html">About</a> 
-                <a href="alllcart.html">Cart</a> 
-                <a href="driplogin.html">Login</a> 
-                <a href="1of1.html">1 of 1 shop</a> 
-                <a href="profile.html">Drip Profile</a> 
-            </div> 
-        </nav> 
-    </div> 
-</header> 
 
-<!-- Main Product Showcase Grid --> 
-<main class="product-grid"> 
-    <div class="product"> 
-        <div style="position:relative;"> 
-            <button class="wish-btn" onclick="toggleWish(this, 'DS0 double waist jogger', 'double-waist jogger', 15, 'WhatsApp Image 2026-08-03 at 3.22.11 AM.jpeg', 'DS0 nano singlet, consisting of unmatched Aura embeded in its premium fabric, for the ones that choose to drip like stars in a simple way.')">❤</button> 
-            <img src="WhatsApp Image 2026-08-14 at 1.55.24 AM.jpeg" alt="DSO double waist jogger" onclick="openPopup('DS0 double waist jogger', 'WhatsApp Image 2026-08-03 at 3.22.11 AM.jpeg', 'WhatsApp Image 2026-08-03 at 3.22.11 AM.jpeg', 15, 'DS0 nano singlet, consisting of unmatched Aura embeded in its premium fabric, for the ones that choose to drip like stars in a simple way.')"> 
-        </div> 
-        <div class="product-details"> 
-            <div class="live-viewers"><div class="live-dot"></div><span class="view-count">2</span> people are viewing this right now</div> 
-            <b> DSO nano singlet</b><br> 
-            <span class="old-price" data-usd="15">$15</span><span class="sale-price" data-usd="15">$15</span> 
-            <p>DS0 nano singlet, consisting of unmatched Aura embeded in its premium fabric for, the ones that choose to drip like stars in a simple way.</p> 
-            <button class="btn-organic" onclick="addToCart('DS0 double waist jogger','M',15,1,'WhatsApp Image 2026-07-15 at 3.35.05 AM.jpeg','Dripstar Singlet designed for the perfect drip.',this)">Add to Cart</button> 
-            <div class="confirmation">your dso-singlet has been added to your cart</div> 
-        </div> 
-    </div> 
-    <div class="product"> 
-        <button class="wish-btn" onclick="toggleWish(this, 'DSO Black-MOB-sleeveless', 'Black-MOB-sleeveless', 25, 'sleeve.jpeg', 'Dripstar MOB - black sleeveless designed for the perfect drip.')">❤</button> 
-        <img src="sleeve.jpeg" alt="Black MOB-sleeveless" onclick="openPopup('DS0 Black-MOB-sleeveless', 'sleeve.jpeg', 'WhatsApp Image 2026-07-13 at 12.55.04 AM.jpeg', 25, 'Dripstar MOB - black sleeveless designed for the perfect drip.')"> 
-        <div class="product-details"> 
-            <div class="live-viewers"><div class="live-dot"></div><span class="view-count">4</span> people are viewing this right now</div> 
-            <b>DS0 Black-MOB-sleeveless</b><br> 
-            <span class="old-price" data-usd="25">$25</span><span class="sale-price" data-usd="25">$25</span> 
-            <p>Dripstar MOB - black sleeveless designed for the perfect drip.</p> 
-            <button class="btn-organic" onclick="addToCart('DS0 Black-MOB-sleeveless','M',25,1,'sleeve.jpeg','Dripstar MOB - black sleeveless designed for the perfect drip.',this)">Add to Cart</button> 
-            <div class="confirmation">your drip has been added to your cart</div> 
-        </div> 
+<header class="header">
+  <div class="logo">
+    <h2><a href="index.html"><img src="WhatsApp Image 2026-07-15 at 3.20.36 AM.jpeg" alt="Dripstar Originals logo"></a></h2>
+  </div>
+
+  <div class="nav-controls">
+    <button id="themeToggleBtn" class="theme-toggle-btn"
+            type="button" onclick="toggleTheme()">☀️ Light</button>
+
+    <select id="currency-select" class="currency-select"
+            aria-label="Choose currency" onchange="changeCurrency(this.value)">
+      <option value="USD">USD — US Dollar ($)</option>
+      <option value="EUR">EUR — Euro (€)</option>
+      <option value="GBP">GBP — British Pound (£)</option>
+      <option value="NGN">NGN — Nigerian Naira (₦)</option>
+      <option value="CAD">CAD — Canadian Dollar (CA$)</option>
+      <option value="AUD">AUD — Australian Dollar (A$)</option>
+      <option value="NZD">NZD — New Zealand Dollar (NZ$)</option>
+      <option value="CHF">CHF — Swiss Franc (CHF)</option>
+      <option value="JPY">JPY — Japanese Yen (¥)</option>
+      <option value="CNY">CNY — Chinese Yuan (CN¥)</option>
+      <option value="HKD">HKD — Hong Kong Dollar (HK$)</option>
+      <option value="SGD">SGD — Singapore Dollar (S$)</option>
+      <option value="INR">INR — Indian Rupee (₹)</option>
+      <option value="PKR">PKR — Pakistani Rupee (₨)</option>
+      <option value="BDT">BDT — Bangladeshi Taka (৳)</option>
+      <option value="LKR">LKR — Sri Lankan Rupee (Rs)</option>
+      <option value="NPR">NPR — Nepalese Rupee ( रू)</option>
+      <option value="KRW">KRW — South Korean Won (₩)</option>
+      <option value="TWD">TWD — New Taiwan Dollar (NT$)</option>
+      <option value="THB">THB — Thai Baht (฿)</option>
+      <option value="MYR">MYR — Malaysian Ringgit (RM)</option>
+      <option value="IDR">IDR — Indonesian Rupiah (Rp)</option>
+      <option value="PHP">PHP — Philippine Peso (₱)</option>
+      <option value="VND">VND — Vietnamese Dong (₫)</option>
+      <option value="KHR">KHR — Cambodian Riel (៛)</option>
+      <option value="MMK">MMK — Myanmar Kyat (K)</option>
+      <option value="BND">BND — Brunei Dollar (B$)</option>
+      <option value="MVR">MVR — Maldivian Rufiyaa (Rf)</option>
+      <option value="AED">AED — UAE Dirham (د.إ)</option>
+      <option value="SAR">SAR — Saudi Riyal (﷼)</option>
+      <option value="QAR">QAR — Qatari Riyal (ر.ق)</option>
+      <option value="KWD">KWD — Kuwaiti Dinar (د.ك)</option>
+      <option value="BHD">BHD — Bahraini Dinar (د.ب)</option>
+      <option value="OMR">OMR — Omani Rial (ر.ع.)</option>
+      <option value="JOD">JOD — Jordanian Dinar (د.ا)</option>
+      <option value="ILS">ILS — Israeli New Shekel (₪)</option>
+      <option value="TRY">TRY — Turkish Lira (₺)</option>
+      <option value="RUB">RUB — Russian Ruble (₽)</option>
+      <option value="UAH">UAH — Ukrainian Hryvnia (₴)</option>
+      <option value="PLN">PLN — Polish Złoty (zł)</option>
+      <option value="CZK">CZK — Czech Koruna (Kč)</option>
+      <option value="HUF">HUF — Hungarian Forint (Ft)</option>
+      <option value="RON">RON — Romanian Leu (lei)</option>
+      <option value="BGN">BGN — Bulgarian Lev (лв)</option>
+      <option value="SEK">SEK — Swedish Krona (kr)</option>
+      <option value="NOK">NOK — Norwegian Krone (kr)</option>
+      <option value="DKK">DKK — Danish Krone (kr)</option>
+      <option value="ISK">ISK — Icelandic Króna (kr)</option>
+      <option value="ALL">ALL — Albanian Lek (L)</option>
+      <option value="RSD">RSD — Serbian Dinar (дин.)</option>
+      <option value="BAM">BAM — Convertible Mark (KM)</option>
+      <option value="MDL">MDL — Moldovan Leu (L)</option>
+      <option value="GEL">GEL — Georgian Lari (₾)</option>
+      <option value="AZN">AZN — Azerbaijani Manat (₼)</option>
+      <option value="KZT">KZT — Kazakhstani Tenge (₸)</option>
+      <option value="UZS">UZS — Uzbekistani Som (soʻm)</option>
+      <option value="MNT">MNT — Mongolian Tögrög (₮)</option>
+      <option value="ZAR">ZAR — South African Rand (R)</option>
+      <option value="EGP">EGP — Egyptian Pound (E£)</option>
+      <option value="MAD">MAD — Moroccan Dirham (د.م.)</option>
+      <option value="TND">TND — Tunisian Dinar (د.ت)</option>
+      <option value="DZD">DZD — Algerian Dinar (دج)</option>
+      <option value="KES">KES — Kenyan Shilling (KSh)</option>
+      <option value="GHS">GHS — Ghanaian Cedi (₵)</option>
+      <option value="UGX">UGX — Ugandan Shilling (USh)</option>
+      <option value="TZS">TZS — Tanzanian Shilling (TSh)</option>
+      <option value="RWF">RWF — Rwandan Franc (RF)</option>
+      <option value="ETB">ETB — Ethiopian Birr (Br)</option>
+      <option value="XOF">XOF — West African CFA Franc (CFA)</option>
+      <option value="XAF">XAF — Central African CFA Franc (FCFA)</option>
+      <option value="XPF">XPF — CFP Franc (₣)</option>
+      <option value="BWP">BWP — Botswana Pula (P)</option>
+      <option value="NAD">NAD — Namibian Dollar (N$)</option>
+      <option value="ZMW">ZMW — Zambian Kwacha (ZK)</option>
+      <option value="MUR">MUR — Mauritian Rupee (₨)</option>
+      <option value="SCR">SCR — Seychellois Rupee (₨)</option>
+      <option value="AOA">AOA — Angolan Kwanza (Kz)</option>
+      <option value="BRL">BRL — Brazilian Real (R$)</option>
+      <option value="MXN">MXN — Mexican Peso (MX$)</option>
+      <option value="ARS">ARS — Argentine Peso (AR$)</option>
+      <option value="CLP">CLP — Chilean Peso (CLP$)</option>
+      <option value="COP">COP — Colombian Peso (COL$)</option>
+      <option value="PEN">PEN — Peruvian Sol (S/)</option>
+      <option value="UYU">UYU — Uruguayan Peso ($U)</option>
+      <option value="BOB">BOB — Bolivian Boliviano (Bs.)</option>
+      <option value="CRC">CRC — Costa Rican Colón (₡)</option>
+      <option value="DOP">DOP — Dominican Peso (RD$)</option>
+      <option value="JMD">JMD — Jamaican Dollar (J$)</option>
+      <option value="TTD">TTD — Trinidad and Tobago Dollar (TT$)</option>
+      <option value="BSD">BSD — Bahamian Dollar (B$)</option>
+      <option value="BBD">BBD — Barbadian Dollar (Bds$)</option>
+      <option value="XCD">XCD — East Caribbean Dollar (EC$)</option>
+      <option value="GTQ">GTQ — Guatemalan Quetzal (Q)</option>
+      <option value="HNL">HNL — Honduran Lempira (L)</option>
+      <option value="PAB">PAB — Panamanian Balboa (B/.)</option>
+      <option value="PYG">PYG — Paraguayan Guaraní (₲)</option>
+      <option value="VES">VES — Venezuelan Bolívar (Bs.)</option>
+      <option value="FJD">FJD — Fijian Dollar (FJ$)</option>
+      <option value="PGK">PGK — Papua New Guinean Kina (K)</option>
+      <option value="SBD">SBD — Solomon Islands Dollar (SI$)</option>
+      <option value="WST">WST — Samoan Tala (WS$)</option>
+      <option value="TOP">TOP — Tongan Paʻanga (T$)</option>
+      <option value="VUV">VUV — Vanuatu Vatu (VT)</option>
+    </select>
+
+    <nav class="top-nav">
+      <button class="menu-btn" type="button"
+              aria-expanded="false" aria-controls="nav-links"
+              onclick="toggleMenu(event)">☰ MENU</button>
+
+      <div class="nav-links" id="nav-links">
+        <a href="index.html">Home</a>
+        <a href="shop.html">Male Section</a>
+        <a href="femaleshop.html">Female Section</a>
+        <a href="wishlist.html">Wishlist</a>
+        <a href="dripAbout.html">About</a>
+        <a href="alllcart.html">Cart</a>
+        <a href="driplogin.html">Login</a>
+        <a href="1of1.html">1 of 1 shop</a>
+        <a href="profile.html">Drip Profile</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main class="product-grid" id="product-grid">
+
+  <!-- PRODUCT 1 -->
+  <div class="product">
+    <div style="position:relative;">
+      <button class="wish-btn" onclick="toggleWish(this,'DS0 nano singlet','nanoSinglet',15,'WhatsApp Image 2026-08-03 at 3.22.11 AM.jpeg','DS0 nano singlet, consisting of unmatched Aura embedded in its premium fabric.')">❤</button>
+      <img src="WhatsApp Image 2026-08-14 at 1.55.24 AM.jpeg"
+           alt="DS0 nano singlet"
+           onclick="openPopup('DS0 nano singlet','WhatsApp Image 2026-08-14 at 1.55.24 AM.jpeg','WhatsApp Image 2026-08-03 at 3.22.11 AM.jpeg',15,'DS0 nano singlet, consisting of unmatched Aura embedded in its premium fabric, for the ones that choose to drip like stars in a simple way.')">
     </div>
-
-
-    <div class="product">
-      <button class="wish-btn" onclick="toggleWish(this, 'DSO Black-MOB-hoodie', 'DS0 Black-MOB-hoodie', 40, 'WhatsApp Image 2026-07-06 at 5.21.15 AM.jpeg', 'Dripstar MOB-hoodie designed in black for maximum comfort, aura and for starz only.')">❤</button>
-      <img src="WhatsApp Image 2026-07-06 at 5.21.15 AM.jpeg" alt="Black MOB-hoodie" onclick="openPopup('DSO Black-MOB-hoodie', 'WhatsApp Image 2026-07-06 at 5.21.15 AM.jpeg', 'WhatsApp Image 2026-07-06 at 5.21.15 AM.jpeg', 40, 'Dripstar MOB-hoodie designed in black for maximum comfort, aura and for starz only.')">
-      <div class="product-details">
-        <div class="live-viewers"><div class="live-dot"></div><span class="view-count">2</span> people are viewing this right now</div>
-        <b>DS0 Black-MOB-hoodie</b><br>
-        <span class="old-price" data-usd="50">$50</span><span class="sale-price" data-usd="40">$40</span>
-        <p>Dripstar MOB-hoodie designed in black for maximum comfort, aura and for starz only.</p>
-        <button class="btn-organic" onclick="addToCart('DS0 Black-MOB-hoodie','M',40,1,'WhatsApp Image 2026-07-06 at 5.21.15 AM.jpeg','Dripstar MOB-hoodie designed in black for maximum comfort, aura and for starz only.',this)">Add to Cart</button>
-        <div class="confirmation">your drip has been added to your cart</div>
-      </div>
-    </div>
-
-    <div class="product">
-      <button class="wish-btn" onclick="toggleWish(this, 'DS0 Black-Drip-cap', 'blackDripCap', 10, 'blacoo - Copy.jpeg', 'Dripstar Face Cap designed in black for maximum comfort + aura.')">❤</button>
-      <img src="blacoo - Copy.jpeg" alt="Black drip-cap" onclick="openPopup('DSO Black-Drip-cap', 'blacoo - Copy.jpeg', 'blacoo - Copy.jpeg', 10, 'Dripstar Face Cap designed in black for maximum comfort + aura.')">
-      <div class="product-details">
-        <div class="live-viewers"><div class="live-dot"></div><span class="view-count">6</span> people are viewing this right now</div>
-        <b>DS0 Black-Drip-cap</b><br>
-        <span class="old-price" data-usd="7">$7</span><span class="sale-price" data-usd="10">$10</span>
-        <p>Dripstar Face Cap designed in black for maximum comfort + aura.</p>
-        <button class="btn-organic" onclick="addToCart('DS0 Black-Drip-cap','M',10,1,'blacoo - Copy.jpeg','Dripstar Face Cap designed in black for maximum comfort + aura.',this)">Add to Cart</button>
-        <div class="confirmation">your drip has been added to your cart</div>
-      </div>
-    </div>
-
-
-    <div class="product">
-      <div style="position:relative;">
-        <button class="wish-btn" onclick="toggleWish(this, 'DSO Blue Drip-cap', 'blueDripCap', 10,  'WhatsApp Image 2026-06-25 at 1.13.04 AM.jpeg', 'Dripstar Face Cap designed for maximum aura.')">❤</button>
-        <img src="ChatGPT Image Jun 25, 2026, 01_45_26 AM.png" alt="Blue Drip Cap" onclick="openPopup('DS0 Blue Drip-cap', 'ChatGPT Image Jun 25, 2026, 01_45_26 AM.png', 'WhatsApp Image 2026-06-25 at 1.13.04 AM.jpeg', 10, 'Dripstar Face Cap designed for maximum aura.')">
-      </div>
-      <div class="product-details">
-        <div class="live-viewers"><div class="live-dot"></div><span class="view-count">6</span> people are viewing this right now</div>
-        <b> DS0 Blue Drip-cap</b><br>
-        <span class="old-price" data-usd="8">$8</span><span class="sale-price" data-usd="10">$10</span>
-        <p>Dripstar Face Cap designed for maximum aura.</p>
-        <button class="btn-organic" onclick="addToCart('DS0 Blue Drip-cap','M',10,1,'ChatGPT Image Jun 25, 2026, 01_45_26 AM.png','Dripstar Face Cap designed for maximum aura.',this)">Add to Cart</button>
-        <div class="confirmation">your drip has been added to your cart</div>
-      </div>
-    </div>
-
-    <div class="product">
-      <div style="position:relative;">
-        <button class="wish-btn" onclick="toggleWish(this, '', ' M.O.B singlet', 20, 'WhatsApp Image 2026-08-14 at 2.01.19 AM.jpeg', 'DS0 M.O.B singlet, consisting of unmatched Aura embeded in its premium fabric, for the ones that choose to drip like stars in a simple way.')">❤</button>
-        <img src="WhatsApp Image 2026-08-14 at 2.01.19 AM.jpeg" alt="DS0 M.O.B singlet" onclick="openPopup('DS0 M.O.B singlet', 'WhatsApp Image 2026-08-14 at 2.01.19 AM.jpeg', 'WhatsApp Image 2026-08-14 at 2.01.18 AM.jpeg', 20, 'DSO nano singlet, consisting of unmatched Aura embeded in its premium fabric, for the ones that choose to drip like stars in a simple way.')">
-      </div>
-      <div class="product-details">
-        <div class="live-viewers"><div class="live-dot"></div><span class="view-count">2</span> people are viewing this right now</div>
-        <b> DSO Black M.O.B singlet</b><br>
-        <span class="old-price" data-usd="20">$20</span><span class="sale-price" data-usd="20">$20</span>
-        <p>DS0 Black M.O.B singlet, consisting of unmatched Aura embeded in its premium fabric for, the ones that choose to drip like stars in a simple way.</p>
-        <button class="btn-organic" onclick="addToCart('DS0 M.O.B singlet','M',20,1,'WhatsApp Image 2026-08-14 at 2.01.19 AM.jpeg','DSO M.O.B singlet, consisting of unmatched Aura embeded in its premium fabric for, the ones that choose to drip like stars in a simple way.',this)">Add to Cart</button>
-        <div class="confirmation">your dso-singlet has been added to your cart</div>
-      </div>
-    </div>
-
- <div class="product">
-      <div style="position:relative;">
-        <button class="wish-btn" onclick="toggleWish(this, '', 'DS0 M.O.B singlet', 20, 'WhatsApp Image 2026-08-14 at 2.01.17 AM (1).jpeg', 'DS0 M.O.B singlet, consisting of unmatched Aura embeded in its premium fabric, for the ones that choose to drip like stars in a simple way.')">❤</button>
-        <img src="WhatsApp Image 2026-08-14 at 2.01.17 AM (1).jpeg" alt="DS0 M.O.B singlet" onclick="openPopup('DS0 M.O.B singlet', 'WhatsApp Image 2026-08-14 at 2.01.17 AM (1).jpeg', 'WhatsApp Image 2026-08-14 at 2.01.17 AM.jpeg', 20, 'DSO nano singlet, consisting of unmatched Aura embeded in its premium fabric, for the ones that choose to drip like stars in a simple way.')">
-      </div>
-      <div class="product-details">
-        <div class="live-viewers"><div class="live-dot"></div><span class="view-count">2</span> people are viewing this right now</div>
-        <b> DS0 White M.O.B singlet</b><br>
-        <span class="old-price" data-usd="20">$20</span><span class="sale-price" data-usd="20">$20</span>
-        <p>DS0 White M.O.B singlet, consisting of unmatched Aura embeded in its premium fabric for, the ones that choose to drip like stars in a simple way.</p>
-        <button class="btn-organic" onclick="addToCart('DSO M.O.B singlet','M',20,1,'WhatsApp Image 2026-08-14 at 2.01.19 AM.jpeg','DSO M.O.B singlet, consisting of unmatched Aura embeded in its premium fabric for, the ones that choose to drip like stars in a simple way.',this)">Add to Cart</button>
-        <div class="confirmation">your dso-singlet has been added to your cart</div>
-      </div>
-    </div>
-
-    <div class="product">
-      <div style="position:relative;">
-        <button class="wish-btn" onclick="toggleWish(this, 'DS0 LOS ANGELES POLO', 'laPolo', 25, 'male1 front.jpeg',  'DS0 LOS ANGELES POLO designed for the ultimate drip.')">❤</button>
-        <img src="male1 front.jpeg" alt="LOS ANGELES POLO" onclick="openPopup('DS0 LOS ANGELES POLO', 'male1 front.jpeg', 'male1 back.jpeg', 25, 'DSO LOS ANGELES POLO designed for the ultimate drip.')">
-      </div>
-      <div class="product-details">
-        <div class="live-viewers"><div class="live-dot"></div> SOLD OUT </div>
-        <b> DS0 LOS ANGELES POLO</b><br>
-        <span class="old-price" data-usd="35">$35</span><span class="sale-price" data-usd="25">$25</span>
-        <p>DS0 LOS ANGELES POLO designed for the ultimate drip.</p>
-        <button class="btn-organic" onclick="addToCart('DS0 LOS ANGELES POLO','M',25,1,'male1 front.jpeg','DS0 LOS ANGELES POLO designed for the ultimate drip.',this)">Add to Cart</button>
-        <div class="confirmation">your drip has been added to your cart</div>
-      </div>
-    </div>
-
-    <div class="product">
-      <div style="position:relative;">
-        <button class="wish-btn" onclick="toggleWish(this, 'DSO Ash nano joggers', 'ashNano', 45,  'shein 44.jpeg', 'This contemporary joggers combines comfort and style, perfect for indoors and outdoors activities.')">❤</button>
-        <img src="shein 44.jpeg" alt="Ash Joggers" onclick="openPopup('DS0 Ash nano joggers', 'shein 44.jpeg', 'shein 44-back.jpeg', 45, 'This contemporary joggers combines comfort and style, perfect for indoors and outdoors activities.')">
-      </div>
-      <div class="product-details">
-        <div class="live-viewers"><div class="live-dot"></div><span class="view-count">7</span> people are viewing this right now</div>
-        <b>DS0 Ash nano joggers</b><br>
-        <span class="old-price" data-usd="55">$55</span><span class="sale-price" data-usd="45">$45</span>
-        <p>This contemporary joggers combines comfort and style, perfect for indoors and outdoors activities.</p>
-        <button class="btn-organic" onclick="addToCart('DS0 Ash nano joggers','M',45,1,'shein 44.jpeg','This contemporary joggers combines comfort and style, perfect for indoors and outdoors activities.',this)">Add to Cart</button>
-        <div class="confirmation">your drip has been added to your cart</div>
-      </div>
-    </div>
-
-    <div class="product">
-      <div style="position:relative;">
-        <button class="wish-btn" onclick="toggleWish(this, 'DS0 black nano joggers', 'blackNano', 45, 'shein 3.jpeg', 'Modern fit joggers designed for the ultimate drip. Combines breathable fabric with a sleek street silhouette.')">❤</button>
-        <img src="shein 3.jpeg" alt="Black Joggers" onclick="openPopup('DS0 black nano joggers', 'shein 3.jpeg', 'shein 3-back.jpeg', 45, 'Modern fit joggers designed for the ultimate drip. Combines breathable fabric with a sleek street silhouette.')">
-      </div>
-      <div class="product-details">
-        <div class="live-viewers"><div class="live-dot"></div><span class="view-count">41</span> people are viewing this right now</div>
-        <b>DS0 black nano joggers</b><br>
-        <span class="old-price" data-usd="55">$55</span><span class="sale-price" data-usd="45">$45</span>
-        <p>Modern fit joggers designed for the ultimate drip. Combines breathable fabric with a sleek street silhouette.</p>
-        <button class="btn-organic" onclick="addToCart('DSO black nano joggers','M',45,1,'shein 3.jpeg','Modern fit joggers designed for the ultimate drip. Combines breathable fabric with a sleek street silhouette.',this)">Add to Cart</button>
-        <div class="confirmation">your drip has been added to your cart</div>
-      </div>
-    </div>
-
-    <div class="product">
-      <div style="position:relative;">
-        <button class="wish-btn" onclick="toggleWish(this, 'DS0 black nano cross joggers', 'nanoCross', 50, 'shiencback.jpeg','Modern fit cross designed joggers designed for the ultimate drip.')">❤</button>
-        <img src="shiencfront.jpeg" alt="Black Joggers" onclick="openPopup('DS0 black nano cross joggers', 'shiencfront.jpeg', 'shiencback.jpeg', 50, 'Modern fit cross designed joggers designed for the ultimate drip.')">
-      </div>
-      <div class="product-details">
-        <div class="live-viewers"><div class="live-dot"></div>SOLD OUT</div>
-        <b>DS0 black nano cross joggers</b><br>
-        <span class="old-price" data-usd="65">$65</span><span class="sale-price" data-usd="50">$50</span>
-        <p>Modern fit cross designed joggers designed for the ultimate drip.</p>
-        <button class="btn-organic" onclick="addToCart('DS0 black nano cross joggers','M',50,1,'shiencfront.jpeg','Modern fit cross designed joggers designed for the ultimate drip.',this)">Add to Cart</button>
-        <div class="confirmation">your drip has been added to your cart</div>
-      </div>
-    </div>
-
-    <div class="product">
-      <div style="position:relative;">
-        <button class="wish-btn" onclick="toggleWish(this, 'DSO white Nepo Jacket', 'nepoJacket', 50,  'shiendfront.jpeg', 'Modern Nepo Jacket for the bosses.' )">❤</button>
-        <img src="shiendfront.jpeg" alt="Nepo" onclick="openPopup('DSO white Nepo Jacket', 'shiendfront.jpeg', 'sheindback.jpeg', 50, 'Modern Nepo Jacket for the bosses.')">
-      </div>
-      <div class="product-details">
-        <div class="live-viewers"><div class="live-dot"></div> SOLD OUT</div>
-        <b>DSO white Nepo Jacket</b><br>
-        <span class="old-price" data-usd="65">$65</span><span class="sale-price" data-usd="50">$50</span>
-        <p>Modern Nepo Jacket for the bosses.</p>
-        <button class="btn-organic" onclick="addToCart('DS0 white Nepo Jacket','M',50,1,'shiendfront.jpeg','Modern Nepo Jacket for the bosses.',this)">Add to Cart</button>
-        <div class="confirmation">your drip has been added to your cart</div>
-      </div>
-    </div>
-
-    <div class="product">
-      <div style="position:relative;">
-        <button class="wish-btn" onclick="toggleWish(this, 'DS0 black Drippy joggers', 'drippyJoggers', 55, 'shienEfront.jpeg','Modern fit joggers designed for the ultimate drip.' )">❤</button>
-        <img src="shienEfront.jpeg" alt="Black Joggers" onclick="openPopup('DSO black Drippy joggers', 'shienEfront.jpeg', 'shIEnEback.jpeg', 55, 'Modern fit joggers designed for the ultimate drip.')">
-      </div>
-      <div class="product-details">
-        <div class="live-viewers"><div class="live-dot"></div><span class="view-count">4</span> people are viewing this right now</div>
-        <b>DSO black Drippy joggers</b><br>
-        <span class="old-price" data-usd="65">$65</span><span class="sale-price" data-usd="55">$55</span>
-        <p>Modern fit joggers designed for the ultimate drip.</p>
-        <button class="btn-organic" onclick="addToCart('DS0 black Drippy joggers','M',55,1,'shienEfront.jpeg','Modern fit joggers designed for the ultimate drip.',this)">Add to Cart</button>
-        <div class="confirmation">your drip has been added to your cart</div>
-      </div>
-    </div>
-
-    <div class="product">
-      <div style="position:relative;">
-        <button class="wish-btn" onclick="toggleWish(this, 'DS0 black Wakoo joggers', 'wakooJoggers', 50, 'sheinIfront.jpeg', 'Modern fit WAKOO joggers designed for the ultimate drip. Combines breathable fabric with a sleek street silhouette.' )">❤</button>
-        <img src="sheinIfront.jpeg" alt="Black Joggers" onclick="openPopup('DS0 black Wakoo joggers', 'sheinIfront.jpeg', 'sheinIback.jpeg', 50, 'Modern fit WAKOO joggers designed for the ultimate drip. Combines breathable fabric with a sleek street silhouette.')">
-      </div>
-      <div class="product-details">
-        <div class="live-viewers"><div class="live-dot"></div><span class="view-count">41</span> people are viewing this right now</div>
-        <b>DSO black Wakoo joggers</b><br>
-        <span class="old-price" data-usd="55">$55</span><span class="sale-price" data-usd="50">$50</span>
-        <p>Modern fit WAKOO joggers designed for the ultimate drip. Combines breathable fabric with a sleek street silhouette.</p>
-        <button class="btn-organic" onclick="addToCart('DS0 black Wakoo joggers','M',50,1,'sheinIfront.jpeg','Modern fit WAKOO joggers designed for the ultimate drip. Combines breathable fabric with a sleek street silhouette.',this)">Add to Cart</button>
-        <div class="confirmation">your drip has been added to your cart</div>
-      </div>
-    </div>
-
-    <div class="product">
-      <div style="position:relative;">
-        <button class="wish-btn" onclick="toggleWish(this, 'DS0 Get rich merch', 'getRichMerch', 30,  'm2 front - Copy (2).jpeg', 'DSG Get rich merch is designed for the ultimate drip.' )">❤</button>
-        <img src="m2 front - Copy (2).jpeg" alt="Black Joggers" onclick="openPopup('DSO Get rich merch', 'm2 front - Copy (2).jpeg', '', 30, 'DSO Get rich merch is designed for the ultimate drip.')">
-      </div>
-      <div class="product-details">
-        <div class="live-viewers"><div class="live-dot"></div>SOLD OUT</div>
-        <b>DSO Get rich merch</b><br>
-        <span class="old-price" data-usd="45">$45</span><span class="sale-price" data-usd="30">$30</span>
-        <p>DS0 Get rich merch is designed for the ultimate drip.</p>
-        <button class="btn-organic" onclick="addToCart('DS0 Get rich merch','M',30,1,'m2 front - Copy (2).jpeg','DSO Get rich merch is designed for the ultimate drip.',this)">Add to Cart</button>
-        <div class="confirmation">your drip has been added to your cart</div>
-      </div>
-    </div>
-
-
-  </main>
-
-  <!-- Recently Viewed Section -->
-  <section id="recently-viewed-section">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-      <h3 style="color:var(--gold); margin:0;">Recently Viewed</h3>
-      <button class="btn-clear-rv" onclick="clearRecentlyViewed()">Clear History</button>
-    </div>
-    <div class="rv-container" id="rv-container"></div>
-  </section>
-
-  <!-- Interactive Professional Detail Modal -->
-  <div id="overlay" onclick="closePopup()"></div>
-  <div id="product-popup">
-    <div class="popup-container">
-      <div class="popup-images">
-        <img id="pop-main-img" class="popup-main-img" src="" alt="Product Front View">
-        <div class="popup-thumbs">
-          <img id="pop-thumb-front" class="popup-thumb" src="" onclick="switchPopImage(this.src)">
-          <img id="pop-thumb-back" class="popup-thumb" src="" onclick="switchPopImage(this.src)">
-        </div>
-      </div>
-
-      <div class="popup-info">
-        <h2 id="pop-name">Product Name</h2>
-        <div id="pop-price" style="font-weight:bold; font-size: 1.4rem; color: var(--gold); margin-bottom: 8px;"></div>
-        <p id="pop-desc" class="popup-description">Product Description goes here...</p>
-
-        <div class="popup-form-group">
-          <label for="pop-size">Select Size</label>
-          <select id="pop-size" class="popup-input">
-            <option value="S">Small (S)</option>
-            <option value="M" selected>Medium (M)</option>
-            <option value="L">Large (L)</option>
-            <option value="XL">Extra Large (XL)</option>
-          </select>
-        </div>
-
-        <div class="popup-form-group">
-          <label for="pop-qty">Quantity</label>
-          <input type="number" id="pop-qty" class="popup-input" value="1" min="1">
-        </div>
-
-        <button class="btn-organic" onclick="handlePopupAdd(this)">Add to Cart</button>
-        <div id="pop-confirmation" class="confirmation">your drip has been added to your cart</div>
-
-        <button class="btn-secondary" onclick="closePopup()">Continue Shopping</button>
-      </div>
-    </div>
-
-    <!-- Related Products inside Modal -->
-    <div class="related-products">
-      <h4>Other Related Drips</h4>
-      <div class="related-grid" id="related-grid">
-        <!-- Dynamically rendered related items -->
-      </div>
+    <div class="product-details">
+      <div class="live-viewers"><span class="live-dot"></span><span class="view-count">2</span> people are viewing this right now</div>
+      <b>DS0 nano singlet</b><br>
+      <span class="old-price" data-usd="15">$15</span><span class="sale-price" data-usd="15">$15</span>
+      <p>DS0 nano singlet, consisting of unmatched Aura embedded in its premium fabric for the ones that choose to drip like stars in a simple way.</p>
+      <button class="btn-organic" onclick="addToCart('DS0 nano singlet','M',15,1,'WhatsApp Image 2026-08-14 at 1.55.24 AM.jpeg','DS0 nano singlet, consisting of unmatched Aura embedded in its premium fabric.',this)">Add to Cart</button>
+      <div class="confirmation">Your singlet has been added to your cart.</div>
     </div>
   </div>
 
-  <!-- JavaScript Implementation -->
-  <script>
-    let currentCurrency = 'USD';
-    const exchangeRates = {
-      USD: { symbol: '$', rate: 1 },
-      EUR: { symbol: '€', rate: 0.92 },
-      GBP: { symbol: '£', rate: 0.78 },
-      NGN: { symbol: '₦', rate: 1500 }
-    };
+  <!-- PRODUCT 2 -->
+  <div class="product">
+    <button class="wish-btn" onclick="toggleWish(this,'DS0 Black-MOB-sleeveless','blackMOB',25,'sleeve.jpeg','Dripstar MOB black sleeveless designed for the perfect drip.')">❤</button>
+    <img src="sleeve.jpeg" alt="Black MOB sleeveless"
+         onclick="openPopup('DS0 Black-MOB-sleeveless','sleeve.jpeg','WhatsApp Image 2026-07-13 at 12.55.04 AM.jpeg',25,'Dripstar MOB black sleeveless designed for the perfect drip.')">
+    <div class="product-details">
+      <div class="live-viewers"><span class="live-dot"></span><span class="view-count">4</span> people are viewing this right now</div>
+      <b>DS0 Black-MOB-sleeveless</b><br>
+      <span class="old-price" data-usd="25">$25</span><span class="sale-price" data-usd="25">$25</span>
+      <p>Dripstar MOB black sleeveless designed for the perfect drip.</p>
+      <button class="btn-organic" onclick="addToCart('DS0 Black-MOB-sleeveless','M',25,1,'sleeve.jpeg','Dripstar MOB black sleeveless designed for the perfect drip.',this)">Add to Cart</button>
+      <div class="confirmation">Your drip has been added to your cart.</div>
+    </div>
+  </div>
 
-    let activePopupProduct = {
-      title: '',
-      frontImg: '',
-      backImg: '',
-      price: 0,
-      description: ''
-    };
-    
-    function updateWhatsAppMessage(productName) {
-      const whatsappBtn = document.getElementById('whatsappHelp');
-      if (whatsappBtn) {
-          // Double verified number configuration block
-          const targetNumber = "2349064575303";
-          const customizedText = `Hello Drip Support! I am currently checking out the "${productName}" and want to make an inquiry.`;
-          whatsappBtn.href = `https://wa.me{targetNumber}?text=${encodeURIComponent(customizedText)}`;
-      }
+  <!-- PRODUCT 3 -->
+  <div class="product">
+    <button class="wish-btn" onclick="toggleWish(this,'DS0 Black-MOB-hoodie','blackMOBHoodie',40,'WhatsApp Image 2026-07-06 at 5.21.15 AM.jpeg','Dripstar MOB hoodie designed in black for comfort and style.')">❤</button>
+    <img src="WhatsApp Image 2026-07-06 at 5.21.15 AM.jpeg" alt="Black MOB hoodie"
+         onclick="openPopup('DS0 Black-MOB-hoodie','WhatsApp Image 2026-07-06 at 5.21.15 AM.jpeg','WhatsApp Image 2026-07-06 at 5.21.15 AM.jpeg',40,'Dripstar MOB hoodie designed in black for maximum comfort, aura and for starz only.')">
+    <div class="product-details">
+      <div class="live-viewers"><span class="live-dot"></span><span class="view-count">2</span> people are viewing this right now</div>
+      <b>DS0 Black-MOB-hoodie</b><br>
+      <span class="old-price" data-usd="50">$50</span><span class="sale-price" data-usd="40">$40</span>
+      <p>Dripstar MOB hoodie designed in black for maximum comfort, aura and for starz only.</p>
+      <button class="btn-organic" onclick="addToCart('DS0 Black-MOB-hoodie','M',40,1,'WhatsApp Image 2026-07-06 at 5.21.15 AM.jpeg','Dripstar MOB hoodie designed in black for maximum comfort and style.',this)">Add to Cart</button>
+      <div class="confirmation">Your drip has been added to your cart.</div>
+    </div>
+  </div>
+
+  <!-- PRODUCT 4 -->
+  <div class="product">
+    <button class="wish-btn" onclick="toggleWish(this,'DS0 Black-Drip-cap','blackDripCap',10,'blacoo - Copy.jpeg','Dripstar face cap designed in black for maximum comfort and aura.')">❤</button>
+    <img src="blacoo - Copy.jpeg" alt="Black Drip Cap"
+         onclick="openPopup('DS0 Black-Drip-cap','blacoo - Copy.jpeg','blacoo - Copy.jpeg',10,'Dripstar face cap designed in black for maximum comfort and aura.')">
+    <div class="product-details">
+      <div class="live-viewers"><span class="live-dot"></span><span class="view-count">6</span> people are viewing this right now</div>
+      <b>DS0 Black-Drip-cap</b><br>
+      <span class="old-price" data-usd="7">$7</span><span class="sale-price" data-usd="10">$10</span>
+      <p>Dripstar face cap designed in black for maximum comfort and aura.</p>
+      <button class="btn-organic" onclick="addToCart('DS0 Black-Drip-cap','M',10,1,'blacoo - Copy.jpeg','Dripstar face cap designed in black for maximum comfort and aura.',this)">Add to Cart</button>
+      <div class="confirmation">Your drip has been added to your cart.</div>
+    </div>
+  </div>
+
+  <!-- PRODUCT 5 -->
+  <div class="product">
+    <div style="position:relative;">
+      <button class="wish-btn" onclick="toggleWish(this,'DS0 Blue Drip-cap','blueDripCap',10,'ChatGPT Image Jun 25, 2026, 01_45_26 AM.png','Dripstar face cap designed for maximum aura.')">❤</button>
+      <img src="ChatGPT Image Jun 25, 2026, 01_45_26 AM.png" alt="Blue Drip Cap"
+           onclick="openPopup('DS0 Blue Drip-cap','ChatGPT Image Jun 25, 2026, 01_45_26 AM.png','WhatsApp Image 2026-06-25 at 1.13.04 AM.jpeg',10,'Dripstar face cap designed for maximum aura.')">
+    </div>
+    <div class="product-details">
+      <div class="live-viewers"><span class="live-dot"></span><span class="view-count">6</span> people are viewing this right now</div>
+      <b>DS0 Blue Drip-cap</b><br>
+      <span class="old-price" data-usd="8">$8</span><span class="sale-price" data-usd="10">$10</span>
+      <p>Dripstar face cap designed for maximum aura.</p>
+      <button class="btn-organic" onclick="addToCart('DS0 Blue Drip-cap','M',10,1,'ChatGPT Image Jun 25, 2026, 01_45_26 AM.png','Dripstar face cap designed for maximum aura.',this)">Add to Cart</button>
+      <div class="confirmation">Your drip has been added to your cart.</div>
+    </div>
+  </div>
+
+  <!-- PRODUCT 6 -->
+  <div class="product">
+    <div style="position:relative;">
+      <button class="wish-btn" onclick="toggleWish(this,'DS0 Black M.O.B singlet','blackMOBSinglet',20,'WhatsApp Image 2026-08-14 at 2.01.19 AM.jpeg','DS0 M.O.B singlet with premium fabric and unmatched aura.')">❤</button>
+      <img src="WhatsApp Image 2026-08-14 at 2.01.19 AM.jpeg" alt="Black M.O.B singlet"
+           onclick="openPopup('DS0 Black M.O.B singlet','WhatsApp Image 2026-08-14 at 2.01.19 AM.jpeg','WhatsApp Image 2026-08-14 at 2.01.18 AM.jpeg',20,'DS0 M.O.B singlet, consisting of unmatched Aura embedded in its premium fabric.')">
+    </div>
+    <div class="product-details">
+      <div class="live-viewers"><span class="live-dot"></span><span class="view-count">2</span> people are viewing this right now</div>
+      <b>DS0 Black M.O.B singlet</b><br>
+      <span class="old-price" data-usd="20">$20</span><span class="sale-price" data-usd="20">$20</span>
+      <p>DS0 Black M.O.B singlet, consisting of unmatched aura embedded in its premium fabric.</p>
+      <button class="btn-organic" onclick="addToCart('DS0 Black M.O.B singlet','M',20,1,'WhatsApp Image 2026-08-14 at 2.01.19 AM.jpeg','DS0 M.O.B singlet with premium fabric and unmatched aura.',this)">Add to Cart</button>
+      <div class="confirmation">Your singlet has been added to your cart.</div>
+    </div>
+  </div>
+
+  <!-- PRODUCT 7 -->
+  <div class="product">
+    <div style="position:relative;">
+      <button class="wish-btn" onclick="toggleWish(this,'DS0 White M.O.B singlet','whiteMOBSinglet',20,'WhatsApp Image 2026-08-14 at 2.01.17 AM (1).jpeg','White M.O.B singlet with premium fabric and unmatched aura.')">❤</button>
+      <img src="WhatsApp Image 2026-08-14 at 2.01.17 AM (1).jpeg" alt="White M.O.B singlet"
+           onclick="openPopup('DS0 White M.O.B singlet','WhatsApp Image 2026-08-14 at 2.01.17 AM (1).jpeg','WhatsApp Image 2026-08-14 at 2.01.17 AM.jpeg',20,'White M.O.B singlet, consisting of unmatched aura embedded in its premium fabric.')">
+    </div>
+    <div class="product-details">
+      <div class="live-viewers"><span class="live-dot"></span><span class="view-count">2</span> people are viewing this right now</div>
+      <b>DS0 White M.O.B singlet</b><br>
+      <span class="old-price" data-usd="20">$20</span><span class="sale-price" data-usd="20">$20</span>
+      <p>White M.O.B singlet, consisting of unmatched aura embedded in its premium fabric.</p>
+      <button class="btn-organic" onclick="addToCart('DS0 White M.O.B singlet','M',20,1,'WhatsApp Image 2026-08-14 at 2.01.17 AM (1).jpeg','White M.O.B singlet with premium fabric and unmatched aura.',this)">Add to Cart</button>
+      <div class="confirmation">Your singlet has been added to your cart.</div>
+    </div>
+  </div>
+
+  <!-- PRODUCT 8 -->
+  <div class="product">
+    <div style="position:relative;">
+      <button class="wish-btn" onclick="toggleWish(this,'DS0 LOS ANGELES POLO','laPolo',25,'male1 front.jpeg','DS0 Los Angeles Polo designed for the ultimate drip.')">❤</button>
+      <img src="male1 front.jpeg" alt="Los Angeles Polo"
+           onclick="openPopup('DS0 LOS ANGELES POLO','male1 front.jpeg','male1 back.jpeg',25,'DS0 Los Angeles Polo designed for the ultimate drip.')">
+    </div>
+    <div class="product-details">
+      <div class="live-viewers">SOLD OUT</div>
+      <b>DS0 LOS ANGELES POLO</b><br>
+      <span class="old-price" data-usd="35">$35</span><span class="sale-price" data-usd="25">$25</span>
+      <p>DS0 Los Angeles Polo designed for the ultimate drip.</p>
+      <button class="btn-organic" onclick="addToCart('DS0 LOS ANGELES POLO','M',25,1,'male1 front.jpeg','DS0 Los Angeles Polo designed for the ultimate drip.',this)">Add to Cart</button>
+      <div class="confirmation">Your drip has been added to your cart.</div>
+    </div>
+  </div>
+
+  <!-- PRODUCT 9 -->
+  <div class="product">
+    <div style="position:relative;">
+      <button class="wish-btn" onclick="toggleWish(this,'DS0 Ash nano joggers','ashNano',45,'shein 44.jpeg','Contemporary joggers combining comfort and style.')">❤</button>
+      <img src="shein 44.jpeg" alt="Ash nano joggers"
+           onclick="openPopup('DS0 Ash nano joggers','shein 44.jpeg','shein 44-back.jpeg',45,'These contemporary joggers combine comfort and style, perfect for indoor and outdoor activities.')">
+    </div>
+    <div class="product-details">
+      <div class="live-viewers"><span class="live-dot"></span><span class="view-count">7</span> people are viewing this right now</div>
+      <b>DS0 Ash nano joggers</b><br>
+      <span class="old-price" data-usd="55">$55</span><span class="sale-price" data-usd="45">$45</span>
+      <p>Contemporary joggers combining comfort and style, perfect for indoor and outdoor activities.</p>
+      <button class="btn-organic" onclick="addToCart('DS0 Ash nano joggers','M',45,1,'shein 44.jpeg','Contemporary joggers combining comfort and style.',this)">Add to Cart</button>
+      <div class="confirmation">Your drip has been added to your cart.</div>
+    </div>
+  </div>
+
+  <!-- PRODUCT 10 -->
+  <div class="product">
+    <div style="position:relative;">
+      <button class="wish-btn" onclick="toggleWish(this,'DS0 black nano joggers','blackNano',45,'shein 3.jpeg','Modern-fit joggers with breathable fabric and a sleek street silhouette.')">❤</button>
+      <img src="shein 3.jpeg" alt="Black nano joggers"
+           onclick="openPopup('DS0 black nano joggers','shein 3.jpeg','shein 3-back.jpeg',45,'Modern-fit joggers designed for the ultimate drip, with breathable fabric and a sleek street silhouette.')">
+    </div>
+    <div class="product-details">
+      <div class="live-viewers"><span class="live-dot"></span><span class="view-count">41</span> people are viewing this right now</div>
+      <b>DS0 black nano joggers</b><br>
+      <span class="old-price" data-usd="55">$55</span><span class="sale-price" data-usd="45">$45</span>
+      <p>Modern-fit joggers designed for the ultimate drip, with breathable fabric and a sleek street silhouette.</p>
+      <button class="btn-organic" onclick="addToCart('DS0 black nano joggers','M',45,1,'shein 3.jpeg','Modern-fit joggers with breathable fabric and a sleek street silhouette.',this)">Add to Cart</button>
+      <div class="confirmation">Your drip has been added to your cart.</div>
+    </div>
+  </div>
+
+  <!-- PRODUCT 11 -->
+  <div class="product">
+    <div style="position:relative;">
+      <button class="wish-btn" onclick="toggleWish(this,'DS0 black nano cross joggers','nanoCross',50,'shiencfront.jpeg','Modern cross-design joggers for the ultimate drip.')">❤</button>
+      <img src="shiencfront.jpeg" alt="Black nano cross joggers"
+           onclick="openPopup('DS0 black nano cross joggers','shiencfront.jpeg','shiencback.jpeg',50,'Modern cross-design joggers designed for the ultimate drip.')">
+    </div>
+    <div class="product-details">
+      <div class="live-viewers">SOLD OUT</div>
+      <b>DS0 black nano cross joggers</b><br>
+      <span class="old-price" data-usd="65">$65</span><span class="sale-price" data-usd="50">$50</span>
+      <p>Modern cross-design joggers designed for the ultimate drip.</p>
+      <button class="btn-organic" onclick="addToCart('DS0 black nano cross joggers','M',50,1,'shiencfront.jpeg','Modern cross-design joggers for the ultimate drip.',this)">Add to Cart</button>
+      <div class="confirmation">Your drip has been added to your cart.</div>
+    </div>
+  </div>
+
+  <!-- PRODUCT 12 -->
+  <div class="product">
+    <div style="position:relative;">
+      <button class="wish-btn" onclick="toggleWish(this,'DS0 white Nepo Jacket','nepoJacket',50,'shiendfront.jpeg','Modern Nepo Jacket for the bosses.')">❤</button>
+      <img src="shiendfront.jpeg" alt="White Nepo Jacket"
+           onclick="openPopup('DS0 white Nepo Jacket','shiendfront.jpeg','sheindback.jpeg',50,'Modern Nepo Jacket for the bosses.')">
+    </div>
+    <div class="product-details">
+      <div class="live-viewers">SOLD OUT</div>
+      <b>DS0 white Nepo Jacket</b><br>
+      <span class="old-price" data-usd="65">$65</span><span class="sale-price" data-usd="50">$50</span>
+      <p>Modern Nepo Jacket for the bosses.</p>
+      <button class="btn-organic" onclick="addToCart('DS0 white Nepo Jacket','M',50,1,'shiendfront.jpeg','Modern Nepo Jacket for the bosses.',this)">Add to Cart</button>
+      <div class="confirmation">Your drip has been added to your cart.</div>
+    </div>
+  </div>
+
+  <!-- PRODUCT 13 -->
+  <div class="product">
+    <div style="position:relative;">
+      <button class="wish-btn" onclick="toggleWish(this,'DS0 black Drippy joggers','drippyJoggers',55,'shienEfront.jpeg','Modern-fit joggers designed for the ultimate drip.')">❤</button>
+      <img src="shienEfront.jpeg" alt="Black Drippy joggers"
+           onclick="openPopup('DS0 black Drippy joggers','shienEfront.jpeg','shIEnEback.jpeg',55,'Modern-fit joggers designed for the ultimate drip.')">
+    </div>
+    <div class="product-details">
+      <div class="live-viewers"><span class="live-dot"></span><span class="view-count">4</span> people are viewing this right now</div>
+      <b>DS0 black Drippy joggers</b><br>
+      <span class="old-price" data-usd="65">$65</span><span class="sale-price" data-usd="55">$55</span>
+      <p>Modern-fit joggers designed for the ultimate drip.</p>
+      <button class="btn-organic" onclick="addToCart('DS0 black Drippy joggers','M',55,1,'shienEfront.jpeg','Modern-fit joggers designed for the ultimate drip.',this)">Add to Cart</button>
+      <div class="confirmation">Your drip has been added to your cart.</div>
+    </div>
+  </div>
+
+  <!-- PRODUCT 14 -->
+  <div class="product">
+    <div style="position:relative;">
+      <button class="wish-btn" onclick="toggleWish(this,'DS0 black Wakoo joggers','wakooJoggers',50,'sheinIfront.jpeg','Modern-fit WAKOO joggers with a sleek street silhouette.')">❤</button>
+      <img src="sheinIfront.jpeg" alt="Black Wakoo joggers"
+           onclick="openPopup('DS0 black Wakoo joggers','sheinIfront.jpeg','sheinIback.jpeg',50,'Modern-fit WAKOO joggers designed for the ultimate drip, combining breathable fabric with a sleek street silhouette.')">
+    </div>
+    <div class="product-details">
+      <div class="live-viewers"><span class="live-dot"></span><span class="view-count">41</span> people are viewing this right now</div>
+      <b>DS0 black Wakoo joggers</b><br>
+      <span class="old-price" data-usd="55">$55</span><span class="sale-price" data-usd="50">$50</span>
+      <p>Modern-fit WAKOO joggers combining breathable fabric with a sleek street silhouette.</p>
+      <button class="btn-organic" onclick="addToCart('DS0 black Wakoo joggers','M',50,1,'sheinIfront.jpeg','Modern-fit WAKOO joggers with breathable fabric and a sleek street silhouette.',this)">Add to Cart</button>
+      <div class="confirmation">Your drip has been added to your cart.</div>
+    </div>
+  </div>
+
+  <!-- PRODUCT 15 -->
+  <div class="product">
+    <div style="position:relative;">
+      <button class="wish-btn" onclick="toggleWish(this,'DS0 Get rich merch','getRichMerch',30,'m2 front - Copy (2).jpeg','DS0 Get rich merch designed for the ultimate drip.')">❤</button>
+      <img src="m2 front - Copy (2).jpeg" alt="Get rich merch"
+           onclick="openPopup('DS0 Get rich merch','m2 front - Copy (2).jpeg','',30,'DS0 Get rich merch designed for the ultimate drip.')">
+    </div>
+    <div class="product-details">
+      <div class="live-viewers">SOLD OUT</div>
+      <b>DS0 Get rich merch</b><br>
+      <span class="old-price" data-usd="45">$45</span><span class="sale-price" data-usd="30">$30</span>
+      <p>DS0 Get rich merch designed for the ultimate drip.</p>
+      <button class="btn-organic" onclick="addToCart('DS0 Get rich merch','M',30,1,'m2 front - Copy (2).jpeg','DS0 Get rich merch designed for the ultimate drip.',this)">Add to Cart</button>
+      <div class="confirmation">Your drip has been added to your cart.</div>
+    </div>
+  </div>
+
+</main>
+
+<nav id="shop-pagination" class="shop-pagination" aria-label="Shop product pages"></nav>
+
+<section id="recently-viewed-section">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px;">
+    <h3 style="color:var(--gold);margin:0;">Recently Viewed</h3>
+    <button class="btn-clear-rv" type="button" onclick="clearRecentlyViewed()">Clear History</button>
+  </div>
+  <div class="rv-container" id="rv-container"></div>
+</section>
+
+<div id="overlay" onclick="closePopup()"></div>
+
+<div id="product-popup" role="dialog" aria-modal="true" aria-labelledby="pop-name">
+  <div class="popup-container">
+    <div class="popup-images">
+      <div class="popup-image-stage">
+        <button type="button" class="popup-swipe-arrow prev"
+                onclick="movePopupImage(-1)" aria-label="Previous product image">‹</button>
+
+        <img id="pop-main-img" class="popup-main-img" src=""
+             alt="Product view" draggable="false">
+
+        <button type="button" class="popup-swipe-arrow next"
+                onclick="movePopupImage(1)" aria-label="Next product image">›</button>
+
+        <span class="popup-swipe-hint">SWIPE TO VIEW MORE</span>
+      </div>
+
+      <div class="popup-thumbs">
+        <img id="pop-thumb-front" class="popup-thumb" src=""
+             alt="Front view" role="button" tabindex="0"
+             onclick="switchPopImage(0)"
+             onkeydown="if(event.key==='Enter'||event.key===' ')switchPopImage(0)">
+
+        <img id="pop-thumb-back" class="popup-thumb" src=""
+             alt="Back view" role="button" tabindex="0"
+             onclick="switchPopImage(1)"
+             onkeydown="if(event.key==='Enter'||event.key===' ')switchPopImage(1)">
+      </div>
+    </div>
+
+    <div class="popup-info">
+      <h2 id="pop-name">Product Name</h2>
+
+      <div id="pop-price"
+           style="font-weight:bold;font-size:1.4rem;color:var(--gold);margin-bottom:8px;"></div>
+
+      <p id="pop-desc" class="popup-description">Product description.</p>
+
+      <div class="popup-form-group">
+        <label for="pop-size">Select Size</label>
+        <select id="pop-size" class="popup-input">
+          <option value="S">Small (S)</option>
+          <option value="M" selected>Medium (M)</option>
+          <option value="L">Large (L)</option>
+          <option value="XL">Extra Large (XL)</option>
+        </select>
+      </div>
+
+      <div class="popup-form-group">
+        <label for="pop-qty">Quantity</label>
+        <input type="number" id="pop-qty" class="popup-input" value="1" min="1" step="1">
+      </div>
+
+      <button class="btn-organic" type="button" onclick="handlePopupAdd(this)">Add to Cart</button>
+      <div id="pop-confirmation" class="confirmation">Your drip has been added to your cart.</div>
+      <button class="btn-secondary" type="button" onclick="closePopup()">Continue Shopping</button>
+    </div>
+  </div>
+
+  <div class="related-products">
+    <h4>Other Related Drips</h4>
+    <div class="related-grid" id="related-grid"></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* =========================================================
+   CURRENCY
+========================================================= */
+let currentCurrency = "USD";
+
+const CURRENCY_SYMBOLS = {"USD":"$","EUR":"€","GBP":"£","NGN":"₦","CAD":"CA$","AUD":"A$","NZD":"NZ$","CHF":"CHF","JPY":"¥","CNY":"CN¥","HKD":"HK$","SGD":"S$","INR":"₹","PKR":"₨","BDT":"৳","LKR":"Rs","NPR":" रू","KRW":"₩","TWD":"NT$","THB":"฿","MYR":"RM","IDR":"Rp","PHP":"₱","VND":"₫","KHR":"៛","MMK":"K","BND":"B$","MVR":"Rf","AED":"د.إ","SAR":"﷼","QAR":"ر.ق","KWD":"د.ك","BHD":"د.ب","OMR":"ر.ع.","JOD":"د.ا","ILS":"₪","TRY":"₺","RUB":"₽","UAH":"₴","PLN":"zł","CZK":"Kč","HUF":"Ft","RON":"lei","BGN":"лв","SEK":"kr","NOK":"kr","DKK":"kr","ISK":"kr","ALL":"L","RSD":"дин.","BAM":"KM","MDL":"L","GEL":"₾","AZN":"₼","KZT":"₸","UZS":"soʻm","MNT":"₮","ZAR":"R","EGP":"E£","MAD":"د.م.","TND":"د.ت","DZD":"دج","KES":"KSh","GHS":"₵","UGX":"USh","TZS":"TSh","RWF":"RF","ETB":"Br","XOF":"CFA","XAF":"FCFA","XPF":"₣","BWP":"P","NAD":"N$","ZMW":"ZK","MUR":"₨","SCR":"₨","AOA":"Kz","BRL":"R$","MXN":"MX$","ARS":"AR$","CLP":"CLP$","COP":"COL$","PEN":"S/","UYU":"$U","BOB":"Bs.","CRC":"₡","DOP":"RD$","JMD":"J$","TTD":"TT$","BSD":"B$","BBD":"Bds$","XCD":"EC$","GTQ":"Q","HNL":"L","PAB":"B/.","PYG":"₲","VES":"Bs.","FJD":"FJ$","PGK":"K","SBD":"SI$","WST":"WS$","TOP":"T$","VUV":"VT"};
+
+const FALLBACK_RATES = {"USD":1,"EUR":0.92,"GBP":0.78,"NGN":1500,"CAD":1.36,"AUD":1.52,"NZD":1.65,"CHF":0.89,"JPY":150,"CNY":7.2,"HKD":7.8,"SGD":1.35,"INR":83,"PKR":278,"BDT":110,"LKR":300,"NPR":133,"KRW":1350,"TWD":32,"THB":36,"MYR":4.7,"IDR":16000,"PHP":58,"VND":25000,"KHR":4100,"MMK":2100,"BND":1.35,"MVR":15.4,"AED":3.67,"SAR":3.75,"QAR":3.64,"KWD":0.31,"BHD":0.377,"OMR":0.385,"JOD":0.709,"ILS":3.7,"TRY":33,"RUB":90,"UAH":41,"PLN":4,"CZK":23,"HUF":360,"RON":4.6,"BGN":1.8,"SEK":10.5,"NOK":10.7,"DKK":6.9,"ISK":138,"ALL":93,"RSD":108,"BAM":1.8,"MDL":17.7,"GEL":2.7,"AZN":1.7,"KZT":470,"UZS":12600,"MNT":3400,"ZAR":18,"EGP":48,"MAD":10,"TND":3.1,"DZD":134,"KES":130,"GHS":15,"UGX":3800,"TZS":2700,"RWF":1300,"ETB":57,"XOF":605,"XAF":605,"XPF":110,"BWP":13.5,"NAD":18,"ZMW":27,"MUR":46,"SCR":13.5,"AOA":850,"BRL":5.4,"MXN":18,"ARS":950,"CLP":930,"COP":4100,"PEN":3.7,"UYU":39,"BOB":6.9,"CRC":520,"DOP":59,"JMD":157,"TTD":6.8,"BSD":1,"BBD":2,"XCD":2.7,"GTQ":7.8,"HNL":24.7,"PAB":1,"PYG":7500,"VES":36,"FJD":2.25,"PGK":3.8,"SBD":8.4,"WST":2.7,"TOP":2.35,"VUV":120};
+
+const exchangeRates = {};
+Object.keys(CURRENCY_SYMBOLS).forEach(code => {
+  exchangeRates[code] = {
+    symbol: CURRENCY_SYMBOLS[code],
+    rate: FALLBACK_RATES[code] || 1
+  };
+});
+
+let exchangeRatesUpdatedAt = null;
+
+function formatCurrency(amount, currencyCode = currentCurrency) {
+  const currency = exchangeRates[currencyCode];
+  if (!currency) return String(amount);
+
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: currencyCode,
+      maximumFractionDigits: ["JPY","KRW","VND","UGX","XOF","XAF","XPF","CLP","PYG","RWF"].includes(currencyCode) ? 0 : 2
+    }).format(amount);
+  } catch (error) {
+    return `${currency.symbol}${Number(amount).toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
   }
-    // Related products catalog mock
-    const relatedCatalog = [
-      { title: 'DS0 Black-Drip-cap', img: 'blacoo - Copy.jpeg', price: 7, desc: 'Dripstar Face Cap in black.' },
-      { title: 'DS0 Ash nano joggers', img: 'shein 44.jpeg', price: 45, desc: 'Ash nano joggers modern fit.' },
-      { title: 'DS0 Black-MOB-sleeveless', img: 'sleeve.jpeg', price: 25, desc: 'Black MOB sleeveless tee.' }
-    ];
+}
 
-    /* --- Dark & Light Mode Theme Management --- */
-    function initTheme() {
-      const savedTheme = localStorage.getItem('dripTheme') || 'dark';
-      document.documentElement.setAttribute('data-theme', savedTheme);
-      updateThemeButtonText(savedTheme);
+async function refreshExchangeRates() {
+  try {
+    const response = await fetch("https://open.er-api.com/v6/latest/USD", {
+      cache: "no-store"
+    });
+    if (!response.ok) throw new Error("Exchange-rate service unavailable");
+
+    const data = await response.json();
+    if (data.result !== "success" || !data.rates) {
+      throw new Error("Invalid exchange-rate response");
     }
 
-    function toggleTheme() {
-      const currentTheme = document.documentElement.getAttribute('data-theme');
-      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-      
-      document.documentElement.setAttribute('data-theme', newTheme);
-      localStorage.setItem('dripTheme', newTheme);
-      updateThemeButtonText(newTheme);
-    }
-
-    function updateThemeButtonText(theme) {
-      const btn = document.getElementById('themeToggleBtn');
-      if (btn) {
-        if (theme === 'light') {
-          btn.innerText = '🌙 Dark';
-        } else {
-          btn.innerText = '☀️ Light';
-        }
-      }
-    }
-
-    // Execute theme initialization right away on script load
-    initTheme();
-
-    /* Navigation Menu Toggle & Auto-Close Outside */
-    function toggleMenu(event) {
-      if (event) event.stopPropagation();
-      document.getElementById('nav-links').classList.toggle('active');
-    }
-
-    document.addEventListener('click', function(event) {
-      const topNav = document.querySelector('.top-nav');
-      const navLinks = document.getElementById('nav-links');
-      
-      if (topNav && !topNav.contains(event.target)) {
-        navLinks.classList.remove('active');
+    Object.keys(exchangeRates).forEach(code => {
+      if (Number.isFinite(data.rates[code])) {
+        exchangeRates[code].rate = data.rates[code];
       }
     });
 
-    /* Currency Switcher Handler */
-    function changeCurrency(currency) {
-      currentCurrency = currency;
-      const { symbol, rate } = exchangeRates[currency];
+    exchangeRatesUpdatedAt = data.time_last_update_utc || new Date().toISOString();
+    try {
+      localStorage.setItem("dripstarExchangeRates", JSON.stringify({
+        rates: data.rates,
+        updatedAt: exchangeRatesUpdatedAt
+      }));
+    } catch (error) {}
 
-      // Update grid prices
-      document.querySelectorAll('.sale-price, .old-price').forEach(elem => {
-        const usdVal = parseFloat(elem.getAttribute('data-usd'));
-        if (!isNaN(usdVal)) {
-          const converted = (usdVal * rate).toLocaleString(undefined, { maximumFractionDigits: 2 });
-          elem.innerText = `${symbol}${converted}`;
-        }
-      });
-
-      // Update active modal price
-      const popPriceElem = document.getElementById('pop-price');
-      if (popPriceElem && popPriceElem.getAttribute('data-usd')) {
-        const popUsd = parseFloat(popPriceElem.getAttribute('data-usd'));
-        const converted = (popUsd * rate).toLocaleString(undefined, { maximumFractionDigits: 2 });
-        popPriceElem.innerText = `${symbol}${converted}`;
-      }
-    }
-
-    /* Modal Image Switcher */
-    function switchPopImage(src) {
-      if (src) {
-        const mainImg = document.getElementById('pop-main-img');
-        mainImg.style.opacity = '0';
-        setTimeout(() => {
-          mainImg.src = src;
-          mainImg.style.opacity = '1';
-        }, 150);
-      }
-    }
-
-    /* Modal Popup Trigger */
-    function openPopup(title, frontImg, backImg, price, description) {
-      activePopupProduct = {
-        title: title || 'Drip Item',
-        frontImg: frontImg || '',
-        backImg: backImg || frontImg || '',
-        price: price || 0,
-        description: description || 'Premium Drip collection streetwear apparel.'
-      };
-
-      document.getElementById('pop-name').innerText = activePopupProduct.title;
-      document.getElementById('pop-desc').innerText = activePopupProduct.description;
-      document.getElementById('pop-main-img').src = activePopupProduct.frontImg;
-      document.getElementById('pop-thumb-front').src = activePopupProduct.frontImg;
-      document.getElementById('pop-thumb-back').src = activePopupProduct.backImg;
-      document.getElementById('pop-qty').value = 1;
-
-      const popPriceElem = document.getElementById('pop-price');
-      popPriceElem.setAttribute('data-usd', activePopupProduct.price);
-      
-      const { symbol, rate } = exchangeRates[currentCurrency];
-      const converted = (activePopupProduct.price * rate).toLocaleString(undefined, { maximumFractionDigits: 2 });
-      popPriceElem.innerText = `${symbol}${converted}`;
-
-      renderRelatedProducts();
-
-      document.getElementById('overlay').style.display = 'block';
-      document.getElementById('product-popup').style.display = 'block';
-
-      addToRecentlyViewed(activePopupProduct.title, activePopupProduct.frontImg, activePopupProduct.price);
-    }
-
-    function closePopup() {
-      document.getElementById('overlay').style.display = 'none';
-      document.getElementById('product-popup').style.display = 'none';
-      const popConfirm = document.getElementById('pop-confirmation');
-      if (popConfirm) popConfirm.style.display = 'none';
-    }
-
-    function renderRelatedProducts() {
-      const grid = document.getElementById('related-grid');
-      grid.innerHTML = '';
-      relatedCatalog.forEach(item => {
-        const div = document.createElement('div');
-        div.className = 'related-item';
-        div.onclick = () => openPopup(item.title, item.img, item.img, item.price, item.desc);
-        div.innerHTML = `
-          <img src="${item.img}" alt="${item.title}">
-          <p>${item.title}</p>
-          <span style="color:var(--gold); font-size:0.75rem; font-weight:bold;">$${item.price}</span>
-        `;
-        grid.appendChild(div);
-      });
-    }
-
-    /* LocalStorage Cart Management with Add Notification */
-    function addToCart(title, size, price, qty, img, description, btnElem) {
-      let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
-      const newItem = {
-        id: String(title).toLowerCase().replace(/\s+/g, '-'),
-        name: title || 'Drip Apparel',
-        title: title || 'Drip Apparel',
-        productName: title || 'Drip Apparel',
-        price: parseFloat(price) || 0,
-        size: size || 'M',
-        qty: parseInt(qty) || 1,
-        quantity: parseInt(qty) || 1,
-        img: img || '',
-        image: img || '',
-        description: description || ''
-      };
-
-      const existingIndex = cart.findIndex(
-        item => (item.title === title || item.name === title) && item.size === size
-      );
-
-      if (existingIndex > -1) {
-        cart[existingIndex].qty += newItem.qty;
-        cart[existingIndex].quantity = cart[existingIndex].qty;
-      } else {
-        cart.push(newItem);
-      }
-
-      localStorage.setItem('cart', JSON.stringify(cart));
-
-      // Show inline confirmation message below button
-      let msgElem = btnElem ? btnElem.nextElementSibling : null;
-      if (msgElem && msgElem.classList.contains('confirmation')) {
-        msgElem.style.display = 'block';
-        setTimeout(() => {
-          msgElem.style.display = 'none';
-        }, 3000);
-      }
-    }
-
-    /* Modal Add to Cart Action */
-    function handlePopupAdd(btnElem) {
-      const size = document.getElementById('pop-size').value;
-      const qty = parseInt(document.getElementById('pop-qty').value) || 1;
-
-      addToCart(
-        activePopupProduct.title,
-        size,
-        activePopupProduct.price,
-        qty,
-        activePopupProduct.frontImg,
-        activePopupProduct.description,
-        btnElem
-      );
-    }
-
-    function toggleWish(btn, title, id, price, img, description) {
-      btn.classList.toggle('active');
-      const isActive = btn.classList.contains('active');
-      
-      let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
-      
-      if (isActive) {
-        const exists = wishlist.some(item => item.title === title);
-        if (!exists) {
-          wishlist.push({
-            id: id || title.toLowerCase().replace(/\s+/g, '-'),
-            title: title,
-            price: price,
-            img: img || '',
-            description: description || ''
-          });
-        }
-      } else {
-        wishlist = wishlist.filter(item => item.title !== title);
-      }
-      
-      localStorage.setItem('wishlist', JSON.stringify(wishlist));
-    }
-    
-    // Run on page load to ensure heart buttons reflect active wishlist status
-    window.addEventListener('DOMContentLoaded', () => {
-      const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
-      document.querySelectorAll('.wish-btn').forEach(btn => {
-        const onclickAttr = btn.getAttribute('onclick');
-        if (onclickAttr) {
-          const match = onclickAttr.match(/toggleWish\(this,\s*'([^']+)'/);
-          if (match && match[1]) {
-            const productTitle = match[1];
-            if (wishlist.some(item => item.title === productTitle)) {
-              btn.classList.add('active');
-            }
+    changeCurrency(currentCurrency);
+  } catch (error) {
+    // Keep the built-in fallback rates so the selector still works offline.
+    try {
+      const cached = JSON.parse(localStorage.getItem("dripstarExchangeRates") || "null");
+      if (cached && cached.rates) {
+        Object.keys(exchangeRates).forEach(code => {
+          if (Number.isFinite(cached.rates[code])) {
+            exchangeRates[code].rate = cached.rates[code];
           }
-        }
-      });
+        });
+        exchangeRatesUpdatedAt = cached.updatedAt || null;
+        changeCurrency(currentCurrency);
+      }
+    } catch (cacheError) {}
+    console.warn("Dripstar currency rates: using fallback or cached rates.", error);
+  }
+}
+
+
+/* =========================================================
+   ACTIVE POPUP PRODUCT AND IMAGE NAVIGATION
+========================================================= */
+let activePopupProduct = {
+  title: "",
+  frontImg: "",
+  backImg: "",
+  price: 0,
+  description: ""
+};
+
+let popupImageIndex = 0;
+let popupTouchStartX = 0;
+let popupTouchStartY = 0;
+let popupSwipeMoved = false;
+
+function getPopupImages() {
+  return [...new Set([
+    activePopupProduct.frontImg,
+    activePopupProduct.backImg
+  ].filter(Boolean))];
+}
+
+function updatePopupImage() {
+  const mainImg = document.getElementById("pop-main-img");
+  const images = getPopupImages();
+
+  if (!mainImg || !images.length) return;
+
+  popupImageIndex = Math.max(0, Math.min(popupImageIndex, images.length - 1));
+
+  mainImg.style.opacity = "0";
+
+  window.setTimeout(() => {
+    mainImg.src = images[popupImageIndex];
+    mainImg.style.opacity = "1";
+  }, 120);
+
+  const frontThumb = document.getElementById("pop-thumb-front");
+  const backThumb = document.getElementById("pop-thumb-back");
+
+  if (frontThumb) {
+    frontThumb.src = activePopupProduct.frontImg || "";
+    frontThumb.classList.toggle("active", popupImageIndex === 0);
+    frontThumb.style.display = activePopupProduct.frontImg ? "" : "none";
+  }
+
+  if (backThumb) {
+    const hasDifferentBack =
+      activePopupProduct.backImg &&
+      activePopupProduct.backImg !== activePopupProduct.frontImg;
+
+    backThumb.src = activePopupProduct.backImg || "";
+    backThumb.style.display = hasDifferentBack ? "" : "none";
+    backThumb.classList.toggle("active", popupImageIndex === 1);
+  }
+
+  const arrows = document.querySelectorAll(".popup-swipe-arrow");
+  arrows.forEach(arrow => {
+    arrow.style.display = images.length > 1 ? "" : "none";
+  });
+
+  const hint = document.querySelector(".popup-swipe-hint");
+  if (hint) {
+    hint.textContent = images.length > 1
+      ? "SWIPE TO VIEW MORE"
+      : "PRODUCT VIEW";
+  }
+}
+
+function switchPopImage(indexOrSrc) {
+  const images = getPopupImages();
+  if (!images.length) return;
+
+  if (typeof indexOrSrc === "number") {
+    popupImageIndex = Math.max(0, Math.min(indexOrSrc, images.length - 1));
+  } else {
+    const index = images.indexOf(indexOrSrc);
+    if (index !== -1) popupImageIndex = index;
+  }
+
+  updatePopupImage();
+}
+
+function movePopupImage(direction) {
+  const images = getPopupImages();
+  if (images.length < 2) return;
+
+  popupImageIndex =
+    (popupImageIndex + direction + images.length) % images.length;
+
+  updatePopupImage();
+}
+
+/* Popup swipe handling */
+const popupImageStage = document.querySelector(".popup-image-stage");
+
+if (popupImageStage) {
+  popupImageStage.addEventListener("touchstart", event => {
+    const touch = event.changedTouches[0];
+    popupTouchStartX = touch.clientX;
+    popupTouchStartY = touch.clientY;
+    popupSwipeMoved = false;
+  }, { passive: true });
+
+  popupImageStage.addEventListener("touchend", event => {
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - popupTouchStartX;
+    const deltaY = touch.clientY - popupTouchStartY;
+
+    if (Math.abs(deltaX) > 45 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      popupSwipeMoved = true;
+      movePopupImage(deltaX < 0 ? 1 : -1);
+    }
+  }, { passive: true });
+}
+
+/* Keyboard navigation for the popup */
+document.addEventListener("keydown", event => {
+  const popup = document.getElementById("product-popup");
+
+  if (!popup || popup.style.display !== "block") return;
+
+  if (event.key === "ArrowRight") {
+    event.preventDefault();
+    movePopupImage(1);
+  }
+
+  if (event.key === "ArrowLeft") {
+    event.preventDefault();
+    movePopupImage(-1);
+  }
+
+  if (event.key === "Escape") closePopup();
+});
+
+/* =========================================================
+   MAIN SHOP IMAGE SWIPING
+   Automatically reads the front/back filenames from each
+   product image's existing openPopup(...) call.
+========================================================= */
+const cardImageStates = new WeakMap();
+
+function getCardImageSources(img) {
+  const onclickCode = img.getAttribute("onclick") || "";
+
+  /*
+    Product image handlers use this format:
+    openPopup('Product title','front image','back image',price,'description')
+  */
+  const match = onclickCode.match(
+    /^\s*openPopup\(\s*'((?:\\'|[^'])*)'\s*,\s*'((?:\\'|[^'])*)'\s*,\s*'((?:\\'|[^'])*)'/
+  );
+
+  if (!match) {
+    return {
+      front: img.getAttribute("src") || "",
+      back: ""
+    };
+  }
+
+  return {
+    front: match[2].replace(/\\'/g, "'"),
+    back: match[3].replace(/\\'/g, "'")
+  };
+}
+
+function setCardImage(img, index) {
+  const state = cardImageStates.get(img);
+  if (!state) return;
+
+  const sources = state.images;
+  if (!sources.length) return;
+
+  state.index = (index + sources.length) % sources.length;
+  img.style.opacity = "0";
+
+  window.setTimeout(() => {
+    img.src = sources[state.index];
+    img.style.opacity = "1";
+  }, 100);
+
+  const stage = img.closest(".product-image-stage");
+  if (stage) {
+    stage.classList.toggle("no-back-view", sources.length < 2);
+    stage.setAttribute(
+      "aria-label",
+      sources.length > 1
+        ? `Product image ${state.index + 1} of ${sources.length}. Swipe to change view.`
+        : "Product image. Open to view product details."
+    );
+  }
+}
+
+function moveCardImage(img, direction) {
+  const state = cardImageStates.get(img);
+  if (!state || state.images.length < 2) return;
+
+  setCardImage(img, state.index + direction);
+}
+
+function initialiseCardImageSwipe(img) {
+  if (cardImageStates.has(img)) return;
+
+  const sources = getCardImageSources(img);
+  const front = sources.front || img.getAttribute("src") || "";
+  const back = sources.back || "";
+
+  const images = [...new Set([front, back].filter(Boolean))];
+
+  const stage = document.createElement("div");
+  stage.className = "product-image-stage";
+
+  img.parentNode.insertBefore(stage, img);
+  stage.appendChild(img);
+
+  const state = { images, index: 0 };
+  cardImageStates.set(img, state);
+
+  /*
+    Add accessible arrow buttons for desktop users.
+    Swiping works independently on touchscreen devices.
+  */
+  const previousButton = document.createElement("button");
+  previousButton.type = "button";
+  previousButton.className = "product-swipe-arrow prev";
+  previousButton.textContent = "‹";
+  previousButton.setAttribute("aria-label", "Show previous product view");
+  previousButton.addEventListener("click", event => {
+    event.stopPropagation();
+    moveCardImage(img, -1);
+  });
+
+  const nextButton = document.createElement("button");
+  nextButton.type = "button";
+  nextButton.className = "product-swipe-arrow next";
+  nextButton.textContent = "›";
+  nextButton.setAttribute("aria-label", "Show next product view");
+  nextButton.addEventListener("click", event => {
+    event.stopPropagation();
+    moveCardImage(img, 1);
+  });
+
+  stage.append(previousButton, nextButton);
+
+  if (images.length < 2) {
+    stage.classList.add("no-back-view");
+    previousButton.style.display = "none";
+    nextButton.style.display = "none";
+  }
+
+  let startX = 0;
+  let startY = 0;
+  let didSwipe = false;
+  let suppressNextClick = false;
+
+  stage.addEventListener("touchstart", event => {
+    const touch = event.changedTouches[0];
+    startX = touch.clientX;
+    startY = touch.clientY;
+    didSwipe = false;
+  }, { passive: true });
+
+  stage.addEventListener("touchend", event => {
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - startX;
+    const deltaY = touch.clientY - startY;
+
+    if (
+      images.length > 1 &&
+      Math.abs(deltaX) > 40 &&
+      Math.abs(deltaX) > Math.abs(deltaY)
+    ) {
+      didSwipe = true;
+      suppressNextClick = true;
+
+      moveCardImage(img, deltaX < 0 ? 1 : -1);
+
+      /*
+        Prevent the browser's follow-up click from opening the popup
+        when the user intended to swipe the card image.
+      */
+      window.setTimeout(() => {
+        suppressNextClick = false;
+      }, 500);
+    }
+  }, { passive: true });
+
+  img.addEventListener("click", event => {
+    if (suppressNextClick || didSwipe) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      didSwipe = false;
+    }
+  }, true);
+}
+
+function initialiseAllCardImageSwipes() {
+  document.querySelectorAll(".product img[onclick]").forEach(img => {
+    if ((img.getAttribute("onclick") || "").includes("openPopup(")) {
+      initialiseCardImageSwipe(img);
+    }
+  });
+}
+
+/* =========================================================
+   OPEN AND CLOSE PRODUCT POPUP
+========================================================= */
+function openPopup(title, frontImg, backImg, price, description) {
+  activePopupProduct = {
+    title: title || "Drip Item",
+    frontImg: frontImg || "",
+    backImg: backImg || frontImg || "",
+    price: Number(price) || 0,
+    description: description || "Premium Drip collection streetwear apparel."
+  };
+
+  popupImageIndex = 0;
+
+  document.getElementById("pop-name").textContent = activePopupProduct.title;
+  document.getElementById("pop-desc").textContent = activePopupProduct.description;
+  document.getElementById("pop-qty").value = 1;
+
+  updatePopupImage();
+  updatePopupPrice();
+  renderRelatedProducts();
+
+  document.getElementById("overlay").style.display = "block";
+  document.getElementById("product-popup").style.display = "block";
+  document.body.style.overflow = "hidden";
+
+  const popConfirmation = document.getElementById("pop-confirmation");
+  if (popConfirmation) popConfirmation.style.display = "none";
+
+  addToRecentlyViewed(
+    activePopupProduct.title,
+    activePopupProduct.frontImg,
+    activePopupProduct.price
+  );
+}
+
+function closePopup() {
+  document.getElementById("overlay").style.display = "none";
+  document.getElementById("product-popup").style.display = "none";
+  document.body.style.overflow = "";
+
+  const confirmation = document.getElementById("pop-confirmation");
+  if (confirmation) confirmation.style.display = "none";
+}
+
+function updatePopupPrice() {
+  const priceElement = document.getElementById("pop-price");
+  const currency = exchangeRates[currentCurrency];
+
+  if (!priceElement || !currency) return;
+
+  priceElement.setAttribute("data-usd", activePopupProduct.price);
+
+  priceElement.textContent = formatCurrency(
+    activePopupProduct.price * currency.rate,
+    currentCurrency
+  );
+}
+
+/* =========================================================
+   RELATED PRODUCTS
+========================================================= */
+const relatedCatalog = [
+  {
+    title: "DS0 Black-Drip-cap",
+    img: "blacoo - Copy.jpeg",
+    price: 10,
+    desc: "Dripstar face cap in black."
+  },
+  {
+    title: "DS0 Ash nano joggers",
+    img: "shein 44.jpeg",
+    price: 45,
+    desc: "Ash nano joggers with a modern fit."
+  },
+  {
+    title: "DS0 Black-MOB-sleeveless",
+    img: "sleeve.jpeg",
+    price: 25,
+    desc: "Black MOB sleeveless designed for the perfect drip."
+  }
+];
+
+function renderRelatedProducts() {
+  const grid = document.getElementById("related-grid");
+  if (!grid) return;
+
+  grid.replaceChildren();
+
+  relatedCatalog.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "related-item";
+    div.tabIndex = 0;
+    div.setAttribute("role", "button");
+    div.setAttribute("aria-label", `View ${item.title}`);
+
+    const image = document.createElement("img");
+    image.src = item.img;
+    image.alt = item.title;
+
+    const name = document.createElement("p");
+    name.textContent = item.title;
+
+    const price = document.createElement("span");
+    price.style.cssText = "color:var(--gold);font-size:.75rem;font-weight:bold;";
+    price.textContent = `$${item.price}`;
+
+    const openRelated = () => {
+      openPopup(item.title, item.img, item.img, item.price, item.desc);
+    };
+
+    div.addEventListener("click", openRelated);
+    div.addEventListener("keydown", event => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openRelated();
+      }
     });
 
-    /* Recently Viewed Feature */
-    function addToRecentlyViewed(name, img, price) {
-      const container = document.getElementById('rv-container');
-      const safeId = name.replace(/\s+/g, '-');
-      if (document.getElementById(`rv-${safeId}`)) return;
-
-      const item = document.createElement('div');
-      item.id = `rv-${safeId}`;
-      item.style.cssText = "min-width:110px; background:var(--card-bg); padding:8px; border-radius:8px; text-align:center; border: 1px solid var(--card-border); animation: fadeSlideUp 0.4s ease-out;";
-      item.innerHTML = `
-        <img src="${img}" style="width:100%; height:80px; object-fit:cover; border-radius:4px;">
-        <p style="font-size:0.75rem; color:var(--text-color); margin-top:4px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${name}</p>
-        <span style="font-size:0.8rem; color:var(--gold); font-weight:bold;">$${price}</span>
-      `;
-      container.appendChild(item);
-    }
-
-    function clearRecentlyViewed() {
-      document.getElementById('rv-container').innerHTML = '';
-
-    }
-    setInterval(() => {
-  // Find all viewer count elements on the page
-  const viewerElements = document.querySelectorAll('.view-count');
-  
-  viewerElements.forEach(element => {
-    // Get the current number of viewers
-    let currentCount = parseInt(element.textContent);
-    
-    // Generate a random change (-2, -1, 0, 1, or 2)
-    const change = Math.floor(Math.random() * 5) - 2;
-    let newCount = currentCount + change;
-    
-    // Keep the count realistic (never let it drop below 2)
-    if (newCount < 2) newCount = 2;
-    
-    // Update the text on the screen
-    element.textContent = newCount;
+    div.append(image, name, price);
+    grid.appendChild(div);
   });
-}, 4000); // Updates every 4 seconds (4000 milliseconds)
+}
 
-  </script>
+/* =========================================================
+   THEME
+========================================================= */
+function initTheme() {
+  let savedTheme = "dark";
+
+  try {
+    savedTheme = localStorage.getItem("dripTheme") || "dark";
+  } catch (error) {
+    savedTheme = "dark";
+  }
+
+  document.documentElement.setAttribute("data-theme", savedTheme);
+  updateThemeButtonText(savedTheme);
+}
+
+function toggleTheme() {
+  const currentTheme = document.documentElement.getAttribute("data-theme");
+  const newTheme = currentTheme === "light" ? "dark" : "light";
+
+  document.documentElement.setAttribute("data-theme", newTheme);
+
+  try {
+    localStorage.setItem("dripTheme", newTheme);
+  } catch (error) {
+    console.warn("Theme preference could not be saved.");
+  }
+
+  updateThemeButtonText(newTheme);
+}
+
+function updateThemeButtonText(theme) {
+  const button = document.getElementById("themeToggleBtn");
+  if (!button) return;
+
+  button.textContent = theme === "light" ? "🌙 Dark" : "☀️ Light";
+}
+
+initTheme();
+
+/* =========================================================
+   NAVIGATION MENU
+========================================================= */
+function toggleMenu(event) {
+  if (event) event.stopPropagation();
+
+  const menu = document.getElementById("nav-links");
+  const button = document.querySelector(".menu-btn");
+
+  menu.classList.toggle("active");
+  button.setAttribute("aria-expanded", menu.classList.contains("active") ? "true" : "false");
+}
+
+document.addEventListener("click", event => {
+  const nav = document.querySelector(".top-nav");
+  const menu = document.getElementById("nav-links");
+  const button = document.querySelector(".menu-btn");
+
+  if (nav && !nav.contains(event.target)) {
+    menu.classList.remove("active");
+    button.setAttribute("aria-expanded", "false");
+  }
+});
+
+/* =========================================================
+   CURRENCY CONVERSION
+========================================================= */
+function changeCurrency(currency) {
+  if (!exchangeRates[currency]) return;
+
+  currentCurrency = currency;
+
+  document.querySelectorAll(".sale-price,.old-price").forEach(element => {
+    const usdValue = parseFloat(element.getAttribute("data-usd"));
+    if (Number.isNaN(usdValue)) return;
+    element.textContent = formatCurrency(usdValue * exchangeRates[currency].rate, currency);
+  });
+
+  const selector = document.getElementById("currency-select");
+  if (selector && selector.value !== currency) selector.value = currency;
+
+  try {
+    localStorage.setItem("dripstarSelectedCurrency", currency);
+  } catch (error) {}
+
+  if (activePopupProduct.title) updatePopupPrice();
+}
+
+// Restore the visitor's last selection and refresh rates when online.
+(function initialiseDripstarCurrency() {
+  const selector = document.getElementById("currency-select");
+  let savedCurrency = "USD";
+
+  try {
+    const saved = localStorage.getItem("dripstarSelectedCurrency");
+    if (saved && exchangeRates[saved]) savedCurrency = saved;
+  } catch (error) {}
+
+  if (selector) selector.value = savedCurrency;
+  changeCurrency(savedCurrency);
+  refreshExchangeRates();
+})();
+
+/* =========================================================
+   CART
+========================================================= */
+function readLocalArray(key) {
+  try {
+    const value = JSON.parse(localStorage.getItem(key) || "[]");
+    return Array.isArray(value) ? value : [];
+  } catch (error) {
+    return [];
+  }
+}
+
+function addToCart(title, size, price, qty, img, description, btnElem) {
+  const cart = readLocalArray("cart");
+
+  const safeQty = Math.max(1, parseInt(qty, 10) || 1);
+  const safePrice = Number(price) || 0;
+
+  const newItem = {
+    id: String(title).toLowerCase().replace(/\s+/g, "-"),
+    name: title || "Drip Apparel",
+    title: title || "Drip Apparel",
+    productName: title || "Drip Apparel",
+    price: safePrice,
+    size: size || "M",
+    qty: safeQty,
+    quantity: safeQty,
+    img: img || "",
+    image: img || "",
+    description: description || ""
+  };
+
+  const existingIndex = cart.findIndex(item =>
+    (item.title === newItem.title || item.name === newItem.name) &&
+    item.size === newItem.size
+  );
+
+  if (existingIndex !== -1) {
+    const oldQty = parseInt(cart[existingIndex].qty || cart[existingIndex].quantity, 10) || 0;
+    cart[existingIndex].qty = oldQty + safeQty;
+    cart[existingIndex].quantity = cart[existingIndex].qty;
+  } else {
+    cart.push(newItem);
+  }
+
+  try {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  } catch (error) {
+    alert("Your cart could not be saved. Please check your browser storage settings.");
+    return;
+  }
+
+  let message = btnElem ? btnElem.nextElementSibling : null;
+
+  if (message && message.classList.contains("confirmation")) {
+    message.style.display = "block";
+
+    window.setTimeout(() => {
+      message.style.display = "none";
+    }, 3000);
+  }
+}
+
+function handlePopupAdd(btnElem) {
+  const size = document.getElementById("pop-size").value;
+  const quantity = Math.max(1, parseInt(document.getElementById("pop-qty").value, 10) || 1);
+
+  document.getElementById("pop-qty").value = quantity;
+
+  addToCart(
+    activePopupProduct.title,
+    size,
+    activePopupProduct.price,
+    quantity,
+    activePopupProduct.frontImg,
+    activePopupProduct.description,
+    btnElem
+  );
+}
+
+/* =========================================================
+   WISHLIST
+========================================================= */
+function toggleWish(button, title, id, price, img, description) {
+  const isActive = button.classList.toggle("active");
+  let wishlist = readLocalArray("wishlist");
+
+  if (isActive) {
+    const exists = wishlist.some(item => item.title === title);
+
+    if (!exists) {
+      wishlist.push({
+        id: id || String(title).toLowerCase().replace(/\s+/g, "-"),
+        title,
+        price: Number(price) || 0,
+        img: img || "",
+        description: description || ""
+      });
+    }
+  } else {
+    wishlist = wishlist.filter(item => item.title !== title);
+  }
+
+  try {
+    localStorage.setItem("wishlist", JSON.stringify(wishlist));
+  } catch (error) {
+    console.warn("Wishlist could not be saved.");
+  }
+}
+
+function initialiseWishlistButtons() {
+  const wishlist = readLocalArray("wishlist");
+
+  document.querySelectorAll(".wish-btn").forEach(button => {
+    const onclickCode = button.getAttribute("onclick") || "";
+    const match = onclickCode.match(/toggleWish\(this,\s*'((?:\\'|[^'])*)'/);
+
+    if (match) {
+      const title = match[1].replace(/\\'/g, "'");
+      button.classList.toggle(
+        "active",
+        wishlist.some(item => item.title === title)
+      );
+    }
+  });
+}
+
+/* =========================================================
+   RECENTLY VIEWED
+========================================================= */
+function addToRecentlyViewed(name, img, price) {
+  const container = document.getElementById("rv-container");
+  if (!container) return;
+
+  const safeId = "rv-" + name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+  if (document.getElementById(safeId)) return;
+
+  const item = document.createElement("div");
+  item.id = safeId;
+  item.style.cssText =
+    "min-width:110px;background:var(--card-bg);padding:8px;border-radius:8px;text-align:center;border:1px solid var(--card-border);animation:fadeSlideUp .4s;";
+
+  const image = document.createElement("img");
+  image.src = img || "";
+  image.alt = name;
+  image.style.cssText = "width:100%;height:80px;object-fit:contain;background:#0a0a0a;border-radius:4px;";
+
+  const title = document.createElement("p");
+  title.textContent = name;
+  title.style.cssText =
+    "font-size:.75rem;color:var(--text-color);margin-top:4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;";
+
+  const priceElement = document.createElement("span");
+  priceElement.style.cssText = "font-size:.8rem;color:var(--gold);font-weight:bold;";
+  priceElement.textContent = "$" + price;
+
+  item.style.cursor = "pointer";
+  item.addEventListener("click", () => openPopup(name, img, img, price, ""));
+
+  item.append(image, title, priceElement);
+  container.appendChild(item);
+}
+
+function clearRecentlyViewed() {
+  const container = document.getElementById("rv-container");
+  if (container) container.replaceChildren();
+}
+
+/* =========================================================
+   NUMBERED PAGINATION
+========================================================= */
+function initShopPagination() {
+  const grid = document.getElementById("product-grid");
+  const pagination = document.getElementById("shop-pagination");
+
+  if (!grid || !pagination) return;
+
+  const products = Array.from(grid.querySelectorAll(".product"));
+  const perPage = 8;
+  let currentPage = 1;
+
+  if (!products.length) {
+    pagination.hidden = true;
+    return;
+  }
+
+  const totalPages = Math.ceil(products.length / perPage);
+
+  function addButton(label, page, options = {}) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = label;
+
+    if (options.active) {
+      button.classList.add("active");
+      button.setAttribute("aria-current", "page");
+    }
+
+    if (options.disabled) button.disabled = true;
+
+    button.addEventListener("click", () => showPage(page));
+    pagination.appendChild(button);
+  }
+
+  function renderPagination() {
+    pagination.replaceChildren();
+
+    addButton("‹ Prev", currentPage - 1, {
+      disabled: currentPage === 1
+    });
+
+    for (let page = 1; page <= totalPages; page++) {
+      addButton(String(page), page, {
+        active: page === currentPage
+      });
+    }
+
+    addButton("Next ›", currentPage + 1, {
+      disabled: currentPage === totalPages
+    });
+  }
+
+  function showPage(page) {
+    currentPage = Math.max(1, Math.min(page, totalPages));
+
+    products.forEach((product, index) => {
+      const productPage = Math.floor(index / perPage) + 1;
+      product.hidden = productPage !== currentPage;
+    });
+
+    renderPagination();
+
+    /*
+      Only scroll after the shopper actively changes page.
+      Initial loading will not jump down the screen.
+    */
+    if (showPage.shouldScroll) {
+      grid.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    showPage.shouldScroll = true;
+  }
+
+  showPage.shouldScroll = false;
+  showPage(1);
+}
+
+/* =========================================================
+   SHIPPING BAR
+========================================================= */
+function updateShippingBar() {
+  const shippingText = document.getElementById("shipping-text");
+  const progress = document.getElementById("shipping-progress-fill");
+
+  if (!shippingText || !progress) return;
+
+  /*
+    Display-only progress. Replace this with the actual cart subtotal
+    when your checkout has a confirmed shipping threshold calculation.
+  */
+  shippingText.textContent = "You're $500 away from FREE SHIPPING!";
+  progress.style.width = "40%";
+}
+
+/* =========================================================
+   INITIALISE PAGE
+========================================================= */
+document.addEventListener("DOMContentLoaded", () => {
+  initialiseAllCardImageSwipes();
+  initialiseWishlistButtons();
+  initShopPagination();
+  updateShippingBar();
+
+  /*
+    The original viewer counter used random numbers to simulate visitors.
+    That is misleading, so this version leaves the displayed counts
+    unchanged instead of inventing live visitor activity.
+  */
+
+});
+</script>
+
+
+<script>
+/* ==========================================================
+   DRIPSTAR ORIGINALS — PREMIUM RESTOCK REQUEST SYSTEM
+   Recipient: chukeprince34@gmail.com
+   Preserves the existing shop, cart, wishlist and pagination.
+========================================================== */
+(() => {
+  "use strict";
+
+  const OWNER_EMAIL = "chukeprince34@gmail.com";
+
+  if (window.dripstarRestockInitialized) return;
+  window.dripstarRestockInitialized = true;
+
+  const soldOutProducts = new Set([
+    "DS0 LOS ANGELES POLO",
+    "DS0 black nano cross joggers",
+    "DS0 white Nepo Jacket",
+    "DS0 Get rich merch"
+  ]);
+
+  const normalize = value =>
+    String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+
+  const isKnownSoldOut = title =>
+    [...soldOutProducts].some(item => normalize(item) === normalize(title));
+
+  /* ---------- PREMIUM ANIMATED STYLES ---------- */
+
+  const styles = document.createElement("style");
+
+  styles.textContent = `
+    .restock-notify-btn {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      min-height: 46px;
+      margin-top: 10px;
+      padding: 12px 10px;
+      border: 1px solid #d4af37 !important;
+      border-radius: 20px !important;
+      background: linear-gradient(135deg,#171717,#29251b) !important;
+      color: #f7f1df !important;
+      font-family: inherit;
+      font-size: 10px !important;
+      font-weight: 750 !important;
+      letter-spacing: 1.1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform .3s ease, box-shadow .3s ease,
+                  background .3s ease, color .3s ease;
+    }
+
+    .restock-notify-btn:hover {
+      background: #d4af37 !important;
+      color: #111 !important;
+      transform: translateY(-3px);
+      box-shadow: 0 9px 24px rgba(212,175,55,.22);
+    }
+
+    .restock-notify-btn .restock-bell {
+      display: inline-block;
+      font-size: 16px;
+      transition: transform .35s ease;
+    }
+
+    .restock-notify-btn:hover .restock-bell {
+      transform: rotate(-15deg) scale(1.2);
+    }
+
+    .restock-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(0,0,0,.78);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity .3s ease, visibility .3s ease;
+    }
+
+    .restock-overlay.is-open {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .restock-dialog {
+      position: relative;
+      width: min(100%, 465px);
+      max-height: 90vh;
+      max-height: 90dvh;
+      overflow-y: auto;
+      padding: clamp(24px,5vw,40px);
+      background: #f8f6ef;
+      color: #171713;
+      border: 1px solid rgba(212,175,55,.8);
+      box-shadow: 0 28px 100px rgba(0,0,0,.45);
+      transform: translateY(25px) scale(.97);
+      opacity: 0;
+      transition: transform .4s cubic-bezier(.2,.8,.2,1),
+                  opacity .35s ease;
+    }
+
+    .restock-overlay.is-open .restock-dialog {
+      transform: translateY(0) scale(1);
+      opacity: 1;
+    }
+
+    .restock-close {
+      position: absolute;
+      top: 10px;
+      right: 13px;
+      width: 38px;
+      height: 38px;
+      border: 0;
+      background: transparent;
+      color: #171713;
+      font-size: 29px;
+      cursor: pointer;
+      transition: color .2s, transform .25s;
+    }
+
+    .restock-close:hover {
+      color: #a17e3d;
+      transform: rotate(90deg);
+    }
+
+    .restock-eyebrow {
+      margin: 0 0 12px;
+      color: #94732f;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+    }
+
+    .restock-heading {
+      margin: 0 28px 13px 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(27px,6vw,36px);
+      font-weight: 500;
+      line-height: 1.15;
+      letter-spacing: -.6px;
+    }
+
+    .restock-description {
+      margin: 0 0 22px;
+      color: #66645d;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .restock-product {
+      margin-bottom: 23px;
+      padding: 14px;
+      background: #efecdf;
+      border-left: 3px solid #c3a04a;
+    }
+
+    .restock-product-label {
+      display: block;
+      margin-bottom: 6px;
+      color: #777267;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+    }
+
+    .restock-product-name {
+      font-size: 13px;
+      font-weight: 750;
+      overflow-wrap: anywhere;
+    }
+
+    .restock-field {
+      display: block;
+      margin-bottom: 16px;
+    }
+
+    .restock-field > span {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+
+    .restock-field input {
+      box-sizing: border-box;
+      width: 100%;
+      min-height: 47px;
+      padding: 12px;
+      border: 1px solid #d8d3c7;
+      border-radius: 0;
+      outline: none;
+      background: #fff;
+      color: #171713;
+      font-family: inherit;
+      font-size: 13px;
+      transition: border-color .25s, box-shadow .25s;
+    }
+
+    .restock-field input:focus {
+      border-color: #b29458;
+      box-shadow: 0 0 0 3px rgba(200,169,106,.17);
+    }
+
+    .restock-submit {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      min-height: 49px;
+      margin-top: 4px;
+      padding: 13px;
+      border: 1px solid #171713;
+      background: #171713;
+      color: #fff;
+      font-family: inherit;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background .25s, color .25s, transform .25s;
+    }
+
+    .restock-submit:hover {
+      background: #c3a04a;
+      border-color: #c3a04a;
+      color: #171713;
+      transform: translateY(-2px);
+    }
+
+    .restock-privacy {
+      margin: 14px 0 0;
+      color: #777267;
+      font-size: 10px;
+      line-height: 1.7;
+      text-align: center;
+    }
+
+    .restock-feedback {
+      display: none;
+      margin-top: 15px;
+      padding: 13px;
+      background: #efecdf;
+      color: #363329;
+      font-size: 12px;
+      line-height: 1.7;
+      overflow-wrap: anywhere;
+    }
+
+    .restock-feedback.is-visible {
+      display: block;
+      animation: restockReveal .35s ease both;
+    }
+
+    .restock-gmail-fallback {
+      display: block;
+      margin-top: 10px;
+      color: #856526;
+      font-weight: 750;
+      text-align: center;
+      text-decoration: underline;
+    }
+
+    .restock-gmail-fallback[hidden] {
+      display: none !important;
+    }
+
+    @keyframes restockReveal {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 420px) {
+      .restock-overlay { padding: 10px; }
+      .restock-dialog { padding: 27px 20px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .restock-notify-btn,
+      .restock-overlay,
+      .restock-dialog,
+      .restock-close,
+      .restock-bell,
+      .restock-submit {
+        transition: none !important;
+      }
+
+      .restock-feedback.is-visible {
+        animation: none !important;
+      }
+    }
+  `;
+
+  document.head.appendChild(styles);
+
+  /* ---------- CREATE THE RESTOCK POPUP ---------- */
+
+  const overlay = document.createElement("div");
+  overlay.className = "restock-overlay";
+  overlay.id = "dripstar-restock-overlay";
+  overlay.setAttribute("aria-hidden", "true");
+
+  overlay.innerHTML = `
+    <section class="restock-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="restock-heading">
+
+      <button type="button" class="restock-close"
+        aria-label="Close restock request">&times;</button>
+
+      <p class="restock-eyebrow">Dripstar Originals · Restock Alert</p>
+
+      <h2 class="restock-heading" id="restock-heading">
+        Don't miss your next drop.
+      </h2>
+
+      <p class="restock-description">
+        This piece is currently unavailable. Enter your details
+        to prepare a restock request for our team.
+      </p>
+
+      <div class="restock-product">
+        <span class="restock-product-label">Selected piece</span>
+        <div class="restock-product-name" id="restock-selected-product"></div>
+      </div>
+
+      <form id="dripstar-restock-form">
+        <label class="restock-field">
+          <span>Full name</span>
+          <input type="text" name="customerName"
+            placeholder="Enter your full name"
+            autocomplete="name" maxlength="100" required>
+        </label>
+
+        <label class="restock-field">
+          <span>Email address</span>
+          <input type="email" name="customerEmail"
+            placeholder="you@example.com"
+            autocomplete="email" maxlength="254" required>
+        </label>
+
+        <button type="submit" class="restock-submit">
+          <span>Continue to Email</span>
+          <span aria-hidden="true">↗</span>
+        </button>
+
+        <p class="restock-privacy">
+          Your email app will open with a prepared message.
+          Review it and press Send. We never ask for your email password.
+        </p>
+
+        <div class="restock-feedback" id="dripstar-restock-feedback"
+          role="status" aria-live="polite"></div>
+
+        <a class="restock-gmail-fallback" href="#"
+          target="_blank" rel="noopener noreferrer" hidden>
+          Open prepared email in Gmail
+        </a>
+      </form>
+    </section>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const form = overlay.querySelector("#dripstar-restock-form");
+  const feedback = overlay.querySelector("#dripstar-restock-feedback");
+  const productLabel = overlay.querySelector("#restock-selected-product");
+  const closeButton = overlay.querySelector(".restock-close");
+  const fallbackLink = overlay.querySelector(".restock-gmail-fallback");
+
+  let selectedProduct = "";
+  let previousFocus = null;
+  let previousBodyOverflow = "";
+
+  /* ---------- OPEN AND CLOSE ---------- */
+
+  function openRestockPopup(productName) {
+    selectedProduct = productName || "Dripstar Originals item";
+
+    productLabel.textContent = selectedProduct;
+    form.reset();
+
+    feedback.textContent = "";
+    feedback.classList.remove("is-visible");
+
+    fallbackLink.hidden = true;
+    fallbackLink.removeAttribute("href");
+
+    previousFocus = document.activeElement;
+    previousBodyOverflow = document.body.style.overflow;
+
+    overlay.classList.add("is-open");
+    overlay.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+
+    window.setTimeout(() => {
+      form.elements.customerName.focus();
+    }, 180);
+  }
+
+  function closeRestockPopup() {
+    overlay.classList.remove("is-open");
+    overlay.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = previousBodyOverflow;
+
+    if (previousFocus && typeof previousFocus.focus === "function") {
+      previousFocus.focus();
+    }
+  }
+
+  // Expose this function for the sold-out product popup button.
+  window.openDripstarRestockFromPopup = function () {
+    openRestockPopup(selectedProduct || "Dripstar Originals item");
+  };
+
+  closeButton.addEventListener("click", closeRestockPopup);
+
+  overlay.addEventListener("click", event => {
+    if (event.target === overlay) closeRestockPopup();
+  });
+
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && overlay.classList.contains("is-open")) {
+      closeRestockPopup();
+    }
+  });
+
+  /* ---------- PRODUCT NAME AND STOCK STATUS ---------- */
+
+  function getProductName(product) {
+    const title = product.querySelector(
+      ".product-name, .product-title, .product-info h2, " +
+      ".product-info h3, .product-details b, .product-details strong, " +
+      "h2, h3, h4, b, strong"
+    );
+
+    return title
+      ? title.textContent.trim()
+      : product.dataset.productName || "Dripstar Originals item";
+  }
+
+  function isSoldOut(product) {
+    const title = getProductName(product);
+
+    if (isKnownSoldOut(title)) return true;
+
+    const stock = (
+      product.dataset.stock ||
+      product.dataset.status ||
+      ""
+    ).toLowerCase().replace(/[\s_-]+/g, "");
+
+    if (["soldout", "outofstock", "unavailable"].includes(stock)) {
+      return true;
+    }
+
+    if (product.matches(
+      ".sold-out, .out-of-stock, .is-sold-out, .unavailable"
+    )) {
+      return true;
+    }
+
+    if (product.querySelector(
+      ".sold-out, .out-of-stock, .stock-status.sold-out"
+    )) {
+      return true;
+    }
+
+    return /\bsold\s*out\b|\bout\s*of\s*stock\b/i.test(
+      product.innerText || ""
+    );
+  }
+
+  function setNotifyButton(button, productName) {
+    if (button.classList.contains("restock-notify-btn")) return;
+
+    button.removeAttribute("onclick");
+    button.removeAttribute("disabled");
+    button.removeAttribute("aria-disabled");
+
+    if (button.tagName === "A") {
+      button.removeAttribute("href");
+      button.setAttribute("role", "button");
+    } else {
+      button.type = "button";
+    }
+
+    button.classList.remove("disabled", "sold-out");
+    button.classList.add("restock-notify-btn");
+
+    button.replaceChildren();
+
+    const bell = document.createElement("span");
+    bell.className = "restock-bell";
+    bell.setAttribute("aria-hidden", "true");
+    bell.textContent = "♧";
+
+    const text = document.createElement("span");
+    text.textContent = "Notify Me When Available";
+
+    button.append(bell, text);
+
+    button.dataset.restockProduct = productName;
+    button.setAttribute(
+      "aria-label",
+      "Request a restock notification for " + productName
+    );
+  }
+
+  function updateSoldOutProducts() {
+    document.querySelectorAll("#product-grid .product").forEach(product => {
+      if (!isSoldOut(product)) return;
+
+      const productName = getProductName(product);
+
+      const addButton = [...product.querySelectorAll("button, a")]
+        .find(button =>
+          /add\s*to\s*cart/i.test(button.textContent || "") ||
+          button.classList.contains("restock-notify-btn")
+        );
+
+      if (addButton) {
+        setNotifyButton(addButton, productName);
+      }
+    });
+  }
+
+  /* ---------- RESTOCK BUTTON CLICK ---------- */
+
+  document.addEventListener("click", event => {
+    const button = event.target.closest(".restock-notify-btn");
+    if (!button) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    openRestockPopup(
+      button.dataset.restockProduct || "Dripstar Originals item"
+    );
+  }, true);
+
+  /* ---------- PREPARE THE GMAIL MESSAGE ---------- */
+
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+
+    if (!form.reportValidity()) return;
+
+    const customerName = form.elements.customerName.value.trim();
+    const customerEmail = form.elements.customerEmail.value.trim();
+
+    if (!customerName || !customerEmail) return;
+
+    const subject = `Restock Request — ${selectedProduct}`;
+
+    const body = [
+      "Hello Dripstar Originals,",
+      "",
+      "I would like to be notified when this item is restocked.",
+      "",
+      `Product: ${selectedProduct}`,
+      `Customer name: ${customerName}`,
+      `Customer email: ${customerEmail}`,
+      "",
+      "Please let me know when this item becomes available again.",
+      "",
+      "Thank you,",
+      customerName
+    ].join("\n");
+
+    const gmailUrl =
+      "https://mail.google.com/mail/?view=cm&fs=1" +
+      "&to=" + encodeURIComponent(OWNER_EMAIL) +
+      "&su=" + encodeURIComponent(subject) +
+      "&body=" + encodeURIComponent(body);
+
+    // Keep this directly inside the submit action so browsers
+    // are less likely to block the Gmail window.
+    const emailWindow = window.open(gmailUrl, "_blank");
+
+    if (emailWindow) {
+      try {
+        emailWindow.opener = null;
+      } catch (error) {
+        // The browser may restrict access to the new window.
+      }
+
+      feedback.textContent =
+        "Your message is ready in Gmail. Review the details and press " +
+        "Send to submit your restock request.";
+
+      fallbackLink.hidden = true;
+    } else {
+      feedback.textContent =
+        "Your browser blocked the new window. Use the link below " +
+        "to open your prepared restock email.";
+
+      fallbackLink.href = gmailUrl;
+      fallbackLink.hidden = false;
+    }
+
+    feedback.classList.add("is-visible");
+  });
+
+  /* ---------- SOLD-OUT POPUP BUTTON ---------- */
+
+  /*
+    The product popup normally offers Add to Cart.
+    For a sold-out product, change that action to a restock request.
+  */
+  const originalOpenPopup = window.openPopup;
+
+  if (typeof originalOpenPopup === "function") {
+    window.openPopup = function (...args) {
+      originalOpenPopup.apply(this, args);
+
+      const title = args[0] || "";
+      const popupButton = document.querySelector(
+        "#product-popup .popup-info > .btn-organic"
+      );
+
+      if (!popupButton) return;
+
+      if (isKnownSoldOut(title)) {
+        popupButton.textContent = "Notify Me When Available";
+        popupButton.removeAttribute("onclick");
+        popupButton.onclick = window.openDripstarRestockFromPopup;
+        popupButton.classList.add("restock-notify-btn");
+        popupButton.dataset.restockProduct = title;
+      } else {
+        popupButton.classList.remove("restock-notify-btn");
+        popupButton.textContent = "Add to Cart";
+        popupButton.onclick = function () {
+          handlePopupAdd(this);
+        };
+        delete popupButton.dataset.restockProduct;
+      }
+    };
+  }
+
+  /* ---------- INITIALISE AND HANDLE DYNAMIC CARDS ---------- */
+
+  function initialiseRestockSystem() {
+    updateSoldOutProducts();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded",
+      initialiseRestockSystem,
+      { once: true }
+    );
+  } else {
+    initialiseRestockSystem();
+  }
+
+  // Supports cards inserted later by pagination or other scripts.
+  const observer = new MutationObserver(() => {
+    updateSoldOutProducts();
+  });
+
+  observer.observe(document.getElementById("product-grid") || document.body, {
+    childList: true,
+    subtree: true
+  });
+
+  window.refreshDripstarRestockButtons = updateSoldOutProducts;
+})();
+</script>
+
+
+
 </body>
 </html>

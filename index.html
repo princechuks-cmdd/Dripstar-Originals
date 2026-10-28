@@ -1508,6 +1508,92 @@ footer {
   }
 
 }
+
+
+/* =========================================
+   DRIPSTAR — EDITORIAL HOMEPAGE HERO
+   Keeps the original logo and menu intact
+========================================= */
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+
+  min-height: clamp(420px, 68vh, 760px);
+  margin: 0 3%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  text-align: center;
+
+  padding: 60px 24px;
+
+  background:
+    linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.88) 0%,
+      rgba(0, 0, 0, 0.30) 48%,
+      rgba(0, 0, 0, 0.12) 100%
+    ),
+    url("sleeve.jpeg") center 35% / cover no-repeat;
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Soft cinematic image treatment */
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+
+  background: linear-gradient(
+    110deg,
+    rgba(0, 0, 0, 0.25),
+    transparent 55%,
+    rgba(176, 138, 74, 0.08)
+  );
+}
+
+/* Keep existing hero text and button above the image */
+.hero-content,
+.hero > a,
+.hero > div {
+  position: relative;
+  z-index: 2;
+}
+
+/* Preserve the original menu above every visual effect */
+.top-nav {
+  z-index: 1000;
+}
+
+/* Preserve the original logo and its placement */
+.logo {
+  position: relative;
+  z-index: 10;
+}
+
+/* Responsive adjustments */
+@media (max-width: 700px) {
+  .hero {
+    min-height: 58vh;
+    margin: 0 12px;
+    padding: 45px 16px;
+    background-position: center center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero {
+    scroll-behavior: auto;
+  }
+}
+
 </style>
 <body>
 
@@ -1588,11 +1674,21 @@ footer {
       <span>DRIPSTAR ORIGINALS</span>
       <span>UNAPOLOGETICALLY ELEGANT</span>
 
-      <span>DRIPSTAR ORIGINALS</span>
-      <span>UNAPOLOGETICALLY ELEGANT</span>
+        <span>ULO DRIPSTAR</span>
+      <span>SOSO ORIGINALS KA  'ANYI REGA</span>
 
       <span>DRIPSTAR ORIGINALS</span>
       <span>UNAPOLOGETICALLY ELEGANT</span>
+
+        <span>ULO DRIPSTAR</span>
+      <span>SOSO ORIGINALS KA  'ANYI REGA</span>
+
+       <span>DRIPSTAR ORIGINALS</span>
+      <span>UNAPOLOGETICALLY ELEGANT</span>
+
+    <span>ULO DRIPSTAR</span>
+      <span>SOSO ORIGINALS KA  'ANYI REGA</span>
+
 
     </div>
 
